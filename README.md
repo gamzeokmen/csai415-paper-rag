@@ -42,3 +42,11 @@ Run the notebooks in order:
 - **Best AutoML params:** k=7, alpha=0.879, metric=dot, normalize=True, svd_dim=384
 
 See `results/automl_run_card.yaml` and `results/online_run_card.yaml` for full details.
+
+## Alfarouq Alsharif — Contribution Notes
+
+I was responsible for corpus curation in this project. I researched and selected the 10 arXiv papers we used as our document collection, downloaded the source PDFs, and verified they were ready for processing. I also handled report writing — specifically the introduction, related work, and conclusion sections, plus general formatting and proofreading.
+
+## Kenan Al Mukhallati — Contribution Notes
+
+I authored the 10 manually-crafted evaluation queries that make up our gold set (notebook 03). Each query was designed to test retrieval against a specific paper in the corpus, giving us solid ground truth for measuring system quality. I also performed reproducibility verification by running all 5 notebooks end-to-end on a clean environment to confirm the outputs match what we report.
