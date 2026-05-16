@@ -42,3 +42,7 @@ Run the notebooks in order:
 - **Best AutoML params:** k=7, alpha=0.879, metric=dot, normalize=True, svd_dim=384
 
 See `results/automl_run_card.yaml` and `results/online_run_card.yaml` for full details.
+
+## Alfarouq Alsharif — Contribution Notes
+
+I was responsible for corpus curation in this project. I researched and selected the 10 arXiv papers we used as our document collection, downloaded the source PDFs, and verified they were ready for processing. I also handled report writing — specifically the introduction, related work, and conclusion sections, plus general formatting and proofreading.
