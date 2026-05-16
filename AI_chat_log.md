@@ -17,6 +17,6 @@ This was the primary development chat where the technical work (corpus ingestion
 
 This chat covered the final wrap-up work: finalizing the report, setting up the GitHub repository, coordinating teammate commits, exporting the chat logs, and building the submission package.
 
-**Link:** _(to be added at the very end of the submission process, since this chat is still active)_
+**Link:** https://claude.ai/share/fbab7507-be56-403b-aa85-862f2d551216
 
 ---
