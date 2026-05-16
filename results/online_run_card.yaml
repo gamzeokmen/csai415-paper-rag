@@ -1,0 +1,17 @@
+experiment: online learning with adaptive drift response
+online_learner: river GaussianNB (Gaussian Naive Bayes)
+drift_detector: ADWIN(delta=0.002, clock=1)
+stream_length: 80
+true_drift_at_sample: 40
+drift_points_detected:
+- 72
+detection_lag_samples: 32
+post_drift_adaptive_accuracy: 0.26
+post_drift_static_accuracy: 0.1125
+relative_improvement_pct: 131.11111111111114
+rubric_target_5pct: PASS
+feature_set:
+- f1
+- f2
+evaluation_protocol: prequential test-then-train, rolling window=10
+timestamp: '2026-05-16T10:29:56.648041'

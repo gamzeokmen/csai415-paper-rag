@@ -1,0 +1,42 @@
+[
+  {
+    "query": "automated literature review using NLP and LLMs",
+    "relevant_doc": "2411.18583"
+  },
+  {
+    "query": "hyperbolic dense retrieval for RAG",
+    "relevant_doc": "2602.07739"
+  },
+  {
+    "query": "membership inference attacks on retrieval systems",
+    "relevant_doc": "2502.00306"
+  },
+  {
+    "query": "fair adaptive iterative refinement retrieval",
+    "relevant_doc": "2510.22344"
+  },
+  {
+    "query": "engineering the RAG stack architecture",
+    "relevant_doc": "2601.05264"
+  },
+  {
+    "query": "retrieval augmented generation in quranic studies",
+    "relevant_doc": "2503.16581"
+  },
+  {
+    "query": "domain adaptive dense retrieval for content recommendation",
+    "relevant_doc": "2602.00899"
+  },
+  {
+    "query": "graph foundation models for RAG",
+    "relevant_doc": "2502.01113"
+  },
+  {
+    "query": "multi-agent collaborative retrieval augmentation",
+    "relevant_doc": "2412.05838"
+  },
+  {
+    "query": "TREC 2025 retrieval augmented generation track overview",
+    "relevant_doc": "2603.09891"
+  }
+]
