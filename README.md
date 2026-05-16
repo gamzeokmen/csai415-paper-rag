@@ -49,4 +49,4 @@ I was responsible for corpus curation in this project. I researched and selected
 
 ## Kenan Al Mukhallati — Contribution Notes
 
-I was responsible for designing and writing the gold set queries used for system evaluation in this project. I created 10 manually crafted evaluation queries in notebook 03 to assess retrieval performance across different query types and difficulty levels. In addition, I carried out reproducibility verification by running all project notebooks end-to-end in a clean environment to ensure the system executed correctly and all reported results were consistent and reproducible.
+I authored the 10 manually-crafted evaluation queries that make up our gold set (notebook 03). Each query was designed to test retrieval against a specific paper in the corpus, giving us solid ground truth for measuring system quality. I also performed reproducibility verification by running all 5 notebooks end-to-end on a clean environment to confirm the outputs match what we report.
