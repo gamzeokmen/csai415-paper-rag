@@ -46,3 +46,7 @@ See `results/automl_run_card.yaml` and `results/online_run_card.yaml` for full d
 ## Alfarouq Alsharif — Contribution Notes
 
 I was responsible for corpus curation in this project. I researched and selected the 10 arXiv papers we used as our document collection, downloaded the source PDFs, and verified they were ready for processing. I also handled report writing — specifically the introduction, related work, and conclusion sections, plus general formatting and proofreading.
+
+## Kenan Al Mukhallati — Contribution Notes
+
+I was responsible for designing and writing the gold set queries used for system evaluation in this project. I created 10 manually crafted evaluation queries in notebook 03 to assess retrieval performance across different query types and difficulty levels. In addition, I carried out reproducibility verification by running all project notebooks end-to-end in a clean environment to ensure the system executed correctly and all reported results were consistent and reproducible.
