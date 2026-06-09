@@ -300,73 +300,75 @@ async def stats():
     return StatsResponse(papers=papers, chunks=chunks, vectors=coll_info.points_count)
 
 
-@app.get('/graph/topics', tags=['graph'])
-async def graph_topics():
+async def _cypher(query: str, **params) -> list[dict]:
+    """Run a read-only Cypher query and return rows as dicts.
+
+    Translates an unconfigured *or unreachable* Neo4j (e.g. a paused/expired
+    Aura instance) into a graceful HTTP 503 instead of an unhandled 500.
+    """
     if not state['neo4j']:
         raise HTTPException(503, 'Neo4j not configured')
-    async with state['neo4j'].session() as session:
-        result = await session.run("""
-            MATCH (t:Topic)<-[:ABOUT]-(p:Paper)
-            RETURN t.name AS topic, count(p) AS papers
-            ORDER BY papers DESC
-        """)
-        return {'topics': [dict(r) async for r in result]}
+    try:
+        async with state['neo4j'].session() as session:
+            result = await session.run(query, **params)
+            return [dict(r) async for r in result]
+    except Exception as exc:  # noqa: BLE001 — DNS / ServiceUnavailable / driver errors
+        log.warning('Neo4j unavailable: %s', exc)
+        raise HTTPException(503, 'Neo4j unavailable') from exc
+
+
+@app.get('/graph/topics', tags=['graph'])
+async def graph_topics():
+    rows = await _cypher("""
+        MATCH (t:Topic)<-[:ABOUT]-(p:Paper)
+        RETURN t.name AS topic, count(p) AS papers
+        ORDER BY papers DESC
+    """)
+    return {'topics': rows}
 
 
 @app.get('/graph/authors', tags=['graph'])
 async def graph_authors(limit: int = 10):
-    if not state['neo4j']:
-        raise HTTPException(503, 'Neo4j not configured')
-    async with state['neo4j'].session() as session:
-        result = await session.run("""
-            MATCH (a:Author)-[:WROTE]->(p:Paper)
-            RETURN a.name AS author, count(p) AS papers
-            ORDER BY papers DESC LIMIT $limit
-        """, limit=limit)
-        return {'authors': [dict(r) async for r in result]}
+    rows = await _cypher("""
+        MATCH (a:Author)-[:WROTE]->(p:Paper)
+        RETURN a.name AS author, count(p) AS papers
+        ORDER BY papers DESC LIMIT $limit
+    """, limit=limit)
+    return {'authors': rows}
+
 
 @app.get('/document/{doc_id}/citations', tags=['graph'])
 async def get_citations(doc_id: str, min_confidence: float = Query(0.0, ge=0.0, le=1.0)):
     """Outgoing citations — papers that {doc_id} cites. Supports min_confidence
     filtering (synthetic edges default to confidence 1.0 when unset)."""
-    if not state['neo4j']:
-        raise HTTPException(503, 'Neo4j not configured')
-    async with state['neo4j'].session() as session:
-        result = await session.run("""
-            MATCH (p:Paper {doc_id: $doc_id})-[r:CITES]->(c:Paper)
-            WHERE coalesce(r.confidence, 1.0) >= $min_conf
-            RETURN c.doc_id AS doc_id, c.title AS title,
-                   coalesce(r.confidence, 1.0) AS confidence,
-                   coalesce(r.synthetic, false) AS synthetic
-            ORDER BY confidence DESC
-        """, doc_id=doc_id, min_conf=min_confidence)
-        edges = [dict(r) async for r in result]
+    edges = await _cypher("""
+        MATCH (p:Paper {doc_id: $doc_id})-[r:CITES]->(c:Paper)
+        WHERE coalesce(r.confidence, 1.0) >= $min_conf
+        RETURN c.doc_id AS doc_id, c.title AS title,
+               coalesce(r.confidence, 1.0) AS confidence,
+               coalesce(r.synthetic, false) AS synthetic
+        ORDER BY confidence DESC
+    """, doc_id=doc_id, min_conf=min_confidence)
     return {'doc_id': doc_id, 'min_confidence': min_confidence, 'citations': edges}
 
 
 @app.get('/document/{doc_id}/cited_by', tags=['graph'])
 async def get_cited_by(doc_id: str):
     """Incoming citations — papers that cite {doc_id}."""
-    if not state['neo4j']:
-        raise HTTPException(503, 'Neo4j not configured')
-    async with state['neo4j'].session() as session:
-        result = await session.run("""
-            MATCH (p:Paper {doc_id: $doc_id})<-[r:CITES]-(c:Paper)
-            RETURN c.doc_id AS doc_id, c.title AS title,
-                   coalesce(r.synthetic, false) AS synthetic
-        """, doc_id=doc_id)
-        edges = [dict(r) async for r in result]
+    edges = await _cypher("""
+        MATCH (p:Paper {doc_id: $doc_id})<-[r:CITES]-(c:Paper)
+        RETURN c.doc_id AS doc_id, c.title AS title,
+               coalesce(r.synthetic, false) AS synthetic
+    """, doc_id=doc_id)
     return {'doc_id': doc_id, 'cited_by': edges}
+
 
 @app.get('/graph/cites', tags=['graph'])
 async def graph_most_cited(limit: int = 10):
     """Most-cited papers in the corpus (via CITES edges)."""
-    if not state['neo4j']:
-        raise HTTPException(503, 'Neo4j not configured')
-    async with state['neo4j'].session() as session:
-        result = await session.run("""
-            MATCH (p:Paper)<-[:CITES]-(c:Paper)
-            RETURN p.title AS title, p.arxiv_id AS arxiv_id, count(c) AS citations
-            ORDER BY citations DESC LIMIT $limit
-        """, limit=limit)
-        return {'most_cited': [dict(r) async for r in result]}
+    rows = await _cypher("""
+        MATCH (p:Paper)<-[:CITES]-(c:Paper)
+        RETURN p.title AS title, p.arxiv_id AS arxiv_id, count(c) AS citations
+        ORDER BY citations DESC LIMIT $limit
+    """, limit=limit)
+    return {'most_cited': rows}
