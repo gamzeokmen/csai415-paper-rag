@@ -62,6 +62,20 @@ uvicorn app.main:app --reload --port 8000
 pytest tests/ -v
 ```
 
+## Dataset & reproducibility
+
+The corpus is **144 open-access arXiv papers** on RAG / retrieval research. The full manifest lives in [`data/corpus_manifest.csv`](data/corpus_manifest.csv) — `paper_id, title, authors, venue, year, primary_category, topics, pdf_path, abs_url, pdf_url` for every paper.
+
+```bash
+# regenerate the manifest from the PDFs on disk (queries arXiv in polite batches)
+python scripts/build_manifest.py
+
+# on a fresh clone, fetch any PDFs that are missing (rate-limited, resumable)
+python scripts/download_corpus.py
+```
+
+The PDFs are committed, so a fresh clone is reproducible without re-downloading; `download_corpus.py` is the fallback if you ever start from the manifest alone.
+
 ## API endpoints
 
 ```
@@ -99,6 +113,7 @@ csai415-paper-rag/
 │   ├── papers/                  144 PDF files
 │   ├── gold_set.json            D1 gold set (10 queries)
 │   ├── gold_set_d2.json         D2 gold set (30 queries, arXiv IDs)
+│   ├── corpus_manifest.csv      full 144-paper manifest (id, title, authors, year, urls)
 │   └── corpus_metadata.json
 ├── results/
 │   ├── d2_metrics_comparison.png
@@ -110,6 +125,9 @@ csai415-paper-rag/
 │   ├── d2_graph_stats.json
 │   ├── d2_final_run_card.yaml
 │   └── d2_ingest_run_card.yaml
+├── scripts/
+│   ├── build_manifest.py        regenerate data/corpus_manifest.csv from arXiv
+│   └── download_corpus.py       fetch any missing PDFs from the manifest
 ├── tests/
 │   └── test_api.py              11 smoke tests
 ├── docker-compose.yml
