@@ -16,9 +16,7 @@ This was the primary development chat where the D1 technical work (corpus ingest
 
 This chat covered the D1 final wrap-up work: finalizing the report, setting up the GitHub repository, coordinating teammate commits, exporting the chat logs, and building the submission package.
 
-**Links:**
-- https://chatgpt.com/share/6a206f70-a78c-832a-958b-cb2ebe9c28e1
-- https://chatgpt.com/share/6a207d4c-498c-8331-bef5-0eef4de4260c
+**Link:** https://claude.ai/share/fbab7507-be56-403b-aa85-862f2d551216
 
 ---
 
@@ -30,11 +28,15 @@ This was the primary D2 development chat covering: Docker Compose setup (MongoDB
 
 Key debugging sessions included: Docker volume/database name mismatches, qdrant-client API migration (search → query_points), MongoDB ObjectId vs arXiv ID type mismatches in the gold set, and synthetic CITES edge generation using the venue field.
 
+**Links:**
+- https://chatgpt.com/share/6a206f70-a78c-832a-958b-cb2ebe9c28e1
+- https://chatgpt.com/share/6a207d4c-498c-8331-bef5-0eef4de4260c
+
 ---
 
 ## Summary of AI usage
 
-AI assistants (Claude and ChatGPT) were used for:
+AI assistants (Claude and ChatGPT) were used across the project for:
 - Architectural decisions (RRF over weighted sum, async driver selection, cross-encoder reranker integration)
 - Code generation for FastAPI endpoints, evaluation scripts, plotting code, and Jupyter notebooks
 - Debugging cascading errors during Docker/database integration
