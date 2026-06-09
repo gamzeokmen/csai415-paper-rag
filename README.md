@@ -22,7 +22,7 @@ flowchart LR
     PDFs["144 arXiv PDFs"] -->|"PyMuPDF + 400-word chunks"| Ingest["Ingestion<br/>(notebook 06)"]
     Ingest -->|"text + page provenance"| Mongo[("MongoDB<br/>documents + chunks")]
     Ingest -->|"bge-small 384D"| Qdrant[("Qdrant<br/>6,858 vectors")]
-    Ingest -->|"Authors / Papers / Topics"| Neo4j[("Neo4j<br/>graph")]
+    Ingest -->|"Authors / Papers / Topics / CITES"| Neo4j[("Neo4j<br/>graph")]
     Q(["user query"]) --> API{{"FastAPI /search"}}
     Mongo -->|"BM25 sparse"| API
     Qdrant -->|"dense cosine"| API
