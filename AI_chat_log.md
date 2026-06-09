@@ -1,6 +1,6 @@
 # AI Chat Logs — CSAI415 Deliverables 1 & 2
 
-This file contains links to the complete unedited Claude conversations used during the development of D1 and D2, submitted as required by the course rubric.
+This file contains links to the complete unedited AI conversations (Claude and ChatGPT) used during the development of D1 and D2, submitted as required by the course rubric.
 
 ---
 
@@ -16,9 +16,9 @@ This was the primary development chat where the D1 technical work (corpus ingest
 
 This chat covered the D1 final wrap-up work: finalizing the report, setting up the GitHub repository, coordinating teammate commits, exporting the chat logs, and building the submission package.
 
-**Link:** https://chatgpt.com/share/6a206f70-a78c-832a-958b-cb2ebe9c28e1
-https://chatgpt.com/share/6a207d4c-498c-8331-bef5-0eef4de4260c
-
+**Links:**
+- https://chatgpt.com/share/6a206f70-a78c-832a-958b-cb2ebe9c28e1
+- https://chatgpt.com/share/6a207d4c-498c-8331-bef5-0eef4de4260c
 
 ---
 
@@ -30,13 +30,11 @@ This was the primary D2 development chat covering: Docker Compose setup (MongoDB
 
 Key debugging sessions included: Docker volume/database name mismatches, qdrant-client API migration (search → query_points), MongoDB ObjectId vs arXiv ID type mismatches in the gold set, and synthetic CITES edge generation using the venue field.
 
-**Link:** [ADD YOUR SHARE LINK HERE — click the share button at the top of this chat]
-
 ---
 
 ## Summary of AI usage
 
-Claude was used for:
+AI assistants (Claude and ChatGPT) were used for:
 - Architectural decisions (RRF over weighted sum, async driver selection, cross-encoder reranker integration)
 - Code generation for FastAPI endpoints, evaluation scripts, plotting code, and Jupyter notebooks
 - Debugging cascading errors during Docker/database integration
