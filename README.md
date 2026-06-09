@@ -15,6 +15,21 @@ Hybrid retrieval-augmented generation system over 144 arXiv papers on RAG/retrie
 | Fusion | Reciprocal Rank Fusion, k=60 |
 | API | FastAPI 2.0.0 (motor + AsyncQdrantClient + AsyncGraphDatabase) |
 
+## Architecture — dataflow (ingest → stores → retrieval → graph)
+
+```mermaid
+flowchart LR
+    PDFs["144 arXiv PDFs"] -->|"PyMuPDF + 400-word chunks"| Ingest["Ingestion<br/>(notebook 06)"]
+    Ingest -->|"text + page provenance"| Mongo[("MongoDB<br/>documents + chunks")]
+    Ingest -->|"bge-small 384D"| Qdrant[("Qdrant<br/>6,858 vectors")]
+    Ingest -->|"Authors / Papers / Topics"| Neo4j[("Neo4j<br/>graph")]
+    Q(["user query"]) --> API{{"FastAPI /search"}}
+    Mongo -->|"BM25 sparse"| API
+    Qdrant -->|"dense cosine"| API
+    API -->|"RRF fusion + cross-encoder rerank"| Out["ranked chunks + citations"]
+    Neo4j -->|"Cypher"| G["/graph/* endpoints"]
+```
+
 ## Team
 
 | Member | ID | Responsibilities |
@@ -45,6 +60,9 @@ docker compose up -d
 
 # 2. populate MongoDB + Qdrant (once)
 jupyter run notebooks/06_ingest_real_stores.ipynb
+
+# 2b. normalize document titles + ids from the manifest
+python scripts/repair_metadata.py
 
 # 3. build Neo4j graph (once)
 jupyter run notebooks/07_neo4j_graph.ipynb

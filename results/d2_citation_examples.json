@@ -1,17 +1,164 @@
 [
   {
-    "query": "refine through subsequent conversational interaction); in modern personalization, gender is one of t",
-    "expected_paper": "Much Ado About Gender",
-    "top_5": []
+    "query": "retrieval augmented generation",
+    "latency_ms": 290.6,
+    "results": [
+      {
+        "rank": 1,
+        "arxiv_id": "2202.01110",
+        "title": "A Survey on Retrieval-Augmented Text Generation",
+        "rerank_score": 0.9933632612228394,
+        "snippet": "model performance. Data-to-Text Generation Recently, retrievalaugmented generation has been adapted to the task of data-to-text generation. To bridge "
+      },
+      {
+        "rank": 2,
+        "arxiv_id": "2305.06983",
+        "title": "Active Retrieval Augmented Generation",
+        "rerank_score": 0.9914211630821228,
+        "snippet": "and generic retrieval augmented LM that actively decides when and what to retrieve throughout the generation process, and are applicable to a variety "
+      },
+      {
+        "rank": 3,
+        "arxiv_id": "2603.09891",
+        "title": "Overview of the TREC 2025 Retrieval Augmented Generation (RAG) Track",
+        "rerank_score": 0.9903045296669006,
+        "snippet": "Overview of the TREC 2025 Retrieval Augmented Generation (RAG) Track Shivani Upadhyay1, Nandan Thakur1, Ronak Pradeep1, Nick Craswell2, Daniel Campos3"
+      }
+    ]
   },
   {
-    "query": "ARES Ranking of Pseudo RAG Systems NQ HotpotQA WoW FEVER MultiRC ReCoRD C.R A.R. C.R A.R. C.R A.R. C",
-    "expected_paper": "ARES: An Automated Evaluation Framework for Retrieval-Augmented",
-    "top_5": []
+    "query": "dense passage retrieval for question answering",
+    "latency_ms": 419.6,
+    "results": [
+      {
+        "rank": 1,
+        "arxiv_id": "2008.02637",
+        "title": "Question and Answer Test-Train Overlap in Open-Domain Question Answering Datasets",
+        "rerank_score": 0.9172260165214539,
+        "snippet": "Wu, Sergey Edunov, Danqi Chen, and Wen-tau Yih. 2020. Dense Passage Retrieval for Open-Domain Question Answering. arXiv:2004.04906 [cs]. ArXiv: 2004.0"
+      },
+      {
+        "rank": 2,
+        "arxiv_id": "2112.01488",
+        "title": "ColBERTv2: Effective and Efficient Retrieval via Lightweight Late Interaction",
+        "rerank_score": 0.8988803625106812,
+        "snippet": "Christopher D Manning. 2022. Hindsight: Posterior-guided training of retrievers for improved open-ended generation. In International Conference on Lea"
+      },
+      {
+        "rank": 3,
+        "arxiv_id": "2004.04906",
+        "title": "Dense Passage Retrieval for Open-Domain Question Answering",
+        "rerank_score": 0.8355127573013306,
+        "snippet": "Dense Passage Retrieval for Open-Domain Question Answering Vladimir Karpukhin∗, Barlas O˘guz∗, Sewon Min†, Patrick Lewis, Ledell Wu, Sergey Edunov, Da"
+      }
+    ]
   },
   {
-    "query": "massive MIMO,\u201d IEEE Wireless Communications, vol. 27, no. 4, pp. 74\u201380, 2020. [28] S. Sanayei and A.",
-    "expected_paper": "Digital Object Identi\ufb01er **xx.xxxx/xxxxxx**",
-    "top_5": []
+    "query": "chain of thought reasoning in language models",
+    "latency_ms": 1577.9,
+    "results": [
+      {
+        "rank": 1,
+        "arxiv_id": "2309.10814",
+        "title": "Natural Language Embedded Programs for Hybrid Language Symbolic Reasoning",
+        "rerank_score": 0.9672858715057373,
+        "snippet": "analysis platform for natural language understanding. In Proceedings of the 2018 EMNLP Workshop BlackboxNLP: Analyzing and Interpreting Neural Network"
+      },
+      {
+        "rank": 2,
+        "arxiv_id": "2206.07682",
+        "title": "Emergent Abilities of Large Language Models",
+        "rerank_score": 0.5016933679580688,
+        "snippet": "Le. A simple method for commonsense reasoning. arXiv preprint arXiv:1806.02847, 2018. URL https://arxiv.org/abs/1806.02847. Thomas Wang, Adam Roberts,"
+      },
+      {
+        "rank": 3,
+        "arxiv_id": "2206.07682",
+        "title": "Emergent Abilities of Large Language Models",
+        "rerank_score": 0.2998798191547394,
+        "snippet": "Published in Transactions on Machine Learning Research (08/2022) 1021 1022 1023 1024 0 5 10 15 20 25 No chain of thought Chain of thought GSM8K Accura"
+      }
+    ]
+  },
+  {
+    "query": "parameter efficient fine-tuning low-rank adaptation",
+    "latency_ms": 483.7,
+    "results": [
+      {
+        "rank": 1,
+        "arxiv_id": "2311.12023",
+        "title": "LQ-LoRA: Low-rank Plus Quantized Matrix Decomposition for Efficient Language Model Finetuning",
+        "rerank_score": 0.9397138953208923,
+        "snippet": "today (OpenAI, 2023; Bubeck et al., 2023). Improving the memory-efficiency of LLM finetuning thus remains a key step in widening the scope of problems"
+      },
+      {
+        "rank": 2,
+        "arxiv_id": "2106.09685",
+        "title": "LoRA: Low-Rank Adaptation of Large Language Models",
+        "rerank_score": 0.5572550892829895,
+        "snippet": "a smaller ampliﬁcation factor. We also provide a visualization in Section H.3 for how the correlation changes as we include more top singular directio"
+      },
+      {
+        "rank": 3,
+        "arxiv_id": "2311.12023",
+        "title": "LQ-LoRA: Low-rank Plus Quantized Matrix Decomposition for Efficient Language Model Finetuning",
+        "rerank_score": 0.48035573959350586,
+        "snippet": "Published as a conference paper at ICLR 2024 LQ-LORA: LOW-RANK PLUS QUANTIZED MATRIX DECOMPOSITION FOR EFFICIENT LANGUAGE MODEL FINETUNING Han Guo†⋆ P"
+      }
+    ]
+  },
+  {
+    "query": "cross-encoder reranking for retrieval",
+    "latency_ms": 462.9,
+    "results": [
+      {
+        "rank": 1,
+        "arxiv_id": "2601.05264",
+        "title": "Engineering the RAG Stack: A Comprehensive Review of the Architecture and Trust Frameworks for Retrieval-Augmented Generation Systems",
+        "rerank_score": 0.9971917271614075,
+        "snippet": "meticulous cross-encoder reranking [52], [53]. 5.2.1 Cross-Encoder Integration and Pipeline Architecture The RE-RAG architecture employs a two-stage r"
+      },
+      {
+        "rank": 2,
+        "arxiv_id": "2407.01219",
+        "title": "Searching for Best Practices in Retrieval-Augmented Generation",
+        "rerank_score": 0.4891907572746277,
+        "snippet": "= 0.3 for our retrieval and main experiments. Additional implementation details are presented in Appendix A.2. 3.5 Reranking Methods After the initial"
+      },
+      {
+        "rank": 3,
+        "arxiv_id": "2106.00882",
+        "title": "Efficient Passage Retrieval with Hashing for Open-domain Question Answering",
+        "rerank_score": 0.051543209701776505,
+        "snippet": "reranking stages. At the candidate generation stage, we efﬁciently obtain the top-l candidate passages using the Hamming distance between the binary c"
+      }
+    ]
+  },
+  {
+    "query": "in-context learning few-shot",
+    "latency_ms": 486.7,
+    "results": [
+      {
+        "rank": 1,
+        "arxiv_id": "2005.14165",
+        "title": "Language Models are Few-Shot Learners",
+        "rerank_score": 0.9857767224311829,
+        "snippet": "Figure 1.3: Aggregate performance for all 42 accuracy-denominated benchmarks While zero-shot performance improves steadily with model size, few-shot p"
+      },
+      {
+        "rank": 2,
+        "arxiv_id": "2312.10997",
+        "title": "Retrieval-Augmented Generation for Large Language Models: A Survey",
+        "rerank_score": 0.6323732137680054,
+        "snippet": "[36] Y. Ma, Y. Cao, Y. Hong, and A. Sun, “Large language model is not a good few-shot information extractor, but a good reranker for hard samples!” ar"
+      },
+      {
+        "rank": 3,
+        "arxiv_id": "2206.07682",
+        "title": "Emergent Abilities of Large Language Models",
+        "rerank_score": 0.5959092974662781,
+        "snippet": "discriminative training. In NAACL, 2004. URL https://aclanthology.org/N04-1043. Sewon Min, Mike Lewis, Hannaneh Hajishirzi, and Luke Zettlemoyer. Nois"
+      }
+    ]
   }
 ]

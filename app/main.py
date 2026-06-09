@@ -233,7 +233,7 @@ async def search(
     seen_docs = set()
     for doc_id, chunk_idx, score in candidates:
         text = state['chunk_lookup'].get((doc_id, chunk_idx), '')
-        doc = await state['db'].documents.find_one({'_id': doc_id})
+        doc = await state['db'].documents.find_one({'doc_id': doc_id})
         results.append(ChunkResult(
             doc_id       = str(doc_id),
             chunk_idx    = int(chunk_idx),
@@ -243,7 +243,7 @@ async def search(
             title        = doc.get('title') if doc else None,
             authors      = doc.get('authors') if doc else None,
             year         = doc.get('year') if doc else None,
-            arxiv_id     = doc.get('arxiv_id') if doc else None,
+            arxiv_id     = str(doc_id),
         ))
 
     latency_ms = round((time.time() - t0) * 1000, 1)
@@ -271,7 +271,7 @@ async def list_documents(skip: int = 0, limit: int = 20):
 
 @app.get('/document/{doc_id}', tags=['corpus'])
 async def get_document(doc_id: str):
-    doc = await state['db'].documents.find_one({'_id': doc_id})
+    doc = await state['db'].documents.find_one({'doc_id': doc_id})
     if not doc:
         raise HTTPException(404, f'document {doc_id} not found')
     doc['_id'] = str(doc['_id'])
