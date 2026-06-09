@@ -1,0 +1,17 @@
+[
+  {
+    "query": "refine through subsequent conversational interaction); in modern personalization, gender is one of t",
+    "expected_paper": "Much Ado About Gender",
+    "top_5": []
+  },
+  {
+    "query": "ARES Ranking of Pseudo RAG Systems NQ HotpotQA WoW FEVER MultiRC ReCoRD C.R A.R. C.R A.R. C.R A.R. C",
+    "expected_paper": "ARES: An Automated Evaluation Framework for Retrieval-Augmented",
+    "top_5": []
+  },
+  {
+    "query": "massive MIMO,\u201d IEEE Wireless Communications, vol. 27, no. 4, pp. 74\u201380, 2020. [28] S. Sanayei and A.",
+    "expected_paper": "Digital Object Identi\ufb01er **xx.xxxx/xxxxxx**",
+    "top_5": []
+  }
+]

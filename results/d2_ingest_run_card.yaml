@@ -1,0 +1,10 @@
+chunk_overlap: 50
+chunk_size: 400
+corpus_size: 144
+embedding_model: BAAI/bge-small-en-v1.5
+retrieval:
+  mode: hybrid_rrf
+  p95_ms: 661.2
+  recall_at_5: 1.0
+timestamp: '2026-06-02T22:40:31.000955'
+total_chunks: 6858

@@ -1,0 +1,242 @@
+[
+  {
+    "title": "Much Ado About Gender",
+    "arxiv_id": "2301.04780",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "ARES: An Automated Evaluation Framework for Retrie",
+    "arxiv_id": "2311.09476",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Digital Object Identi\ufb01er **xx.xxxx/xxxxxx**",
+    "arxiv_id": "2209.12893",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Llama 2: Open Foundation and Fine-Tuned Chat Model",
+    "arxiv_id": "2307.09288",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "SpecExec: Massively Parallel Speculative Decoding",
+    "arxiv_id": "2406.02532",
+    "dense": 0,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "Transparent Human Evaluation for Image Captioning",
+    "arxiv_id": "2111.08940",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "arXiv:2002.08909v1  [cs.CL]  10 Feb 2020",
+    "arxiv_id": "2002.08909",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "JOURNAL OF LATEX CLASS FILES, VOL. 14, NO. 8, AUGU",
+    "arxiv_id": "2306.11489",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Published as a conference paper at ICLR 2022",
+    "arxiv_id": "2109.01652",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "From Local to Global: A GraphRAG Approach to",
+    "arxiv_id": "2404.16130",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "FAIR-RAG: Faithful Adaptive Iterative Refinement f",
+    "arxiv_id": "2510.22344",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "Published as a conference paper at ICLR 2024",
+    "arxiv_id": "2311.12023",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "PaLM: Scaling Language Modeling with Pathways",
+    "arxiv_id": "2204.02311",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "What can we Learn Even From the Weakest?",
+    "arxiv_id": "2203.11912",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "MEGA: Multilingual Evaluation of Generative AI",
+    "arxiv_id": "2303.12528",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Published as a conference paper at ICLR 2024",
+    "arxiv_id": "2309.17002",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "IEEE TRANSACTIONS ON NETWORK SCIENCE AND ENGINEERI",
+    "arxiv_id": "2110.07567",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Retrieval-Augmented Generation for",
+    "arxiv_id": "2005.11401",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "GFM-RAG: Graph Foundation Model for Retrieval Augm",
+    "arxiv_id": "2502.01113",
+    "dense": 0,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "HypRAG: Hyperbolic Dense Retrieval for Retrieval A",
+    "arxiv_id": "2602.07739",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Language Models are Few-Shot Learners",
+    "arxiv_id": "2005.14165",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "1 ",
+    "arxiv_id": "2205.14180",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 0,
+    "rerank": 1
+  },
+  {
+    "title": "MNRAS 000, 1\u201318 (2023)",
+    "arxiv_id": "2312.09271",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Atlas: Few-shot Learning with",
+    "arxiv_id": "2208.03299",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "SUPER-NATURALINSTRUCTIONS:",
+    "arxiv_id": "2204.07705",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "A Multitask, Multilingual, Multimodal Evaluation o",
+    "arxiv_id": "2302.04023",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Preprint.",
+    "arxiv_id": "2310.11511",
+    "dense": 0,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "A Survey on Model Compression for Large Language M",
+    "arxiv_id": "2308.07633",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "Pix2Struct: Screenshot Parsing as Pretraining for",
+    "arxiv_id": "2210.03347",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  },
+  {
+    "title": "JINA EMBEDDINGS 2: 8192-Token General-Purpose Text",
+    "arxiv_id": "2310.19923",
+    "dense": 1,
+    "sparse": 1,
+    "hybrid": 1,
+    "rerank": 1
+  }
+]

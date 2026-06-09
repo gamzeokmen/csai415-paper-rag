@@ -1,0 +1,61 @@
+{
+  "paper_nodes": 144,
+  "author_nodes": 50,
+  "topic_nodes": 5,
+  "wrote_edges": 50,
+  "about_edges": 144,
+  "cites_edges": 300,
+  "top_cited": [
+    {
+      "title": "Large Language Models Struggle to Learn Long-Tail Knowledge",
+      "arxiv_id": "2211.08411",
+      "citations": 7
+    },
+    {
+      "title": "An Empirical Study of End-to-End",
+      "arxiv_id": "2209.01540",
+      "citations": 6
+    },
+    {
+      "title": "Digital Object Identi\ufb01er **xx.xxxx/xxxxxx**",
+      "arxiv_id": "2209.12893",
+      "citations": 6
+    },
+    {
+      "title": "Published as a conference paper at ICLR 2024",
+      "arxiv_id": "2309.17002",
+      "citations": 6
+    },
+    {
+      "title": "Online Estimation of Diameter at Breast Height (DBH)",
+      "arxiv_id": "2108.01552",
+      "citations": 6
+    },
+    {
+      "title": "DEMONSTRATE\u2013SEARCH\u2013PREDICT:",
+      "arxiv_id": "2212.14024",
+      "citations": 6
+    },
+    {
+      "title": "JINA EMBEDDINGS 2: 8192-Token General-Purpose Text Embeddings for",
+      "arxiv_id": "2310.19923",
+      "citations": 6
+    },
+    {
+      "title": "Atlas: Few-shot Learning with",
+      "arxiv_id": "2208.03299",
+      "citations": 6
+    },
+    {
+      "title": "1",
+      "arxiv_id": "2208.09282",
+      "citations": 5
+    },
+    {
+      "title": "Training language models to follow instructions",
+      "arxiv_id": "2203.02155",
+      "citations": 5
+    }
+  ],
+  "cites_method": "synthetic: shared-author OR same-venue + 1-year window"
+}

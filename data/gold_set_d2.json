@@ -1,0 +1,132 @@
+[
+  {
+    "query": "Retrieval-Augmented Generation (RAG) enhances Large Language Models (LLMs) by incorporating external, domain-specific data into the generative process. While LLMs are",
+    "relevant_doc": "6a1bc7bad4ba596d472ee905",
+    "title": "A Collaborative Multi-Agent Approach to Retrieval-Augmented Generation Across Diverse Data",
+    "authors": [
+      "Aniruddha Salve",
+      "Saba Attar",
+      "Mahesh Deshmukh",
+      "Sayali Shivpuje",
+      "Arnab Mitra Utsab"
+    ],
+    "year": 2024
+  },
+  {
+    "query": "This research presents and compares multiple approaches to automate the generation of literature reviews using several Natural Language Processing (NLP)",
+    "relevant_doc": "6a1bc7b9d4ba596d472ee8cd",
+    "title": "Automated Literature Review Using NLP Techniques and LLM-Based Retrieval-Augmented Generation",
+    "authors": [
+      "Nurshat Fateh Ali",
+      "Md. Mahdi Mohtasim",
+      "Shakil Mosharrof",
+      "T. Gopi Krishna"
+    ],
+    "year": 2024
+  },
+  {
+    "query": "Accurate and contextually faithful responses are critical when applying large language models (LLMs) to sensitive and domain-specific tasks, such as",
+    "relevant_doc": "6a1bc7cbd4ba596d472eea3b",
+    "title": "Investigating Retrieval-Augmented Generation in Quranic Studies: A Study of 13 Open-Source Large Language Models",
+    "authors": [
+      "Zahra Khalila",
+      "Arbi Haza Nasution",
+      "Winda Monika",
+      "Aytug Onan",
+      "Yohei Murakami",
+      "Yasir Bin Ismail Radi",
+      "Noor Mohammad Osmani"
+    ],
+    "year": 2025
+  },
+  {
+    "query": "The second edition of the TREC Retrieval Augmented Generation (RAG) Track advances research on systems that integrate retrieval and generation",
+    "relevant_doc": "6a1bc7f7d4ba596d472eec41",
+    "title": "Overview of the TREC 2025 Retrieval Augmented Generation (RAG) Track",
+    "authors": [
+      "Shivani Upadhyay",
+      "Nandan Thakur",
+      "Ronak Pradeep",
+      "Nick Craswell",
+      "Daniel Campos",
+      "Jimmy Lin"
+    ],
+    "year": 2026
+  },
+  {
+    "query": "This article provides a comprehensive systematic literature review of academic studies, industrial applications, and real-world deployments from 2018 to 2025,",
+    "relevant_doc": "6a1bc7d5d4ba596d472eeb69",
+    "title": "Engineering the RAG Stack: A Comprehensive Review of the Architecture and Trust Frameworks for Retrieval-Augmented Generation Systems",
+    "authors": [
+      "Dean Wampler",
+      "Dave Nielson",
+      "Alireza Seddighi"
+    ],
+    "year": 2025
+  },
+  {
+    "query": "While Retrieval-Augmented Generation (RAG) mitigates hallucination and knowledge staleness in Large Language Models (LLMs), existing frameworks often falter on complex,",
+    "relevant_doc": "6a1bc7cfd4ba596d472eeab7",
+    "title": "FAIR-RAG: Faithful Adaptive Iterative Refinement for Retrieval-Augmented Generation",
+    "authors": [
+      "Mohammad Aghajani Asl",
+      "Majid Asgari-Bidhendi",
+      "Behrooz Minaei-Bidgoli"
+    ],
+    "year": 2025
+  },
+  {
+    "query": "Embedding geometry plays a fundamental role in retrieval quality, yet dense retrievers for retrieval-augmented generation (RAG) remain largely confined to",
+    "relevant_doc": "6a1bc7f5d4ba596d472eebed",
+    "title": "HypRAG: Hyperbolic Dense Retrieval for Retrieval Augmented Generation",
+    "authors": [
+      "Hiren Madhu",
+      "Ngoc Bui",
+      "Ali Maatouk",
+      "Leandros Tassiulas",
+      "Smita Krishnaswamy",
+      "Menglin Yang",
+      "Sukanta Ganguly",
+      "Kiran Srinivasan",
+      "Rex Ying"
+    ],
+    "year": 2026
+  },
+  {
+    "query": "Retrieval-Augmented Generation (RAG) enables Large Language Models (LLMs) to generate grounded responses by leveraging external knowledge databases without altering model",
+    "relevant_doc": "6a1bc7c3d4ba596d472ee97b",
+    "title": "Riddle Me This! Stealthy Membership Inference for Retrieval-Augmented Generation",
+    "authors": [
+      "Ali Naseh",
+      "Yuefeng Peng",
+      "Anshuman Suri",
+      "Harsh Chaudhari",
+      "Alina Oprea",
+      "Amir Houmansadr"
+    ],
+    "year": 2025
+  },
+  {
+    "query": "Retrieval-augmented generation (RAG) has proven effective in integrating knowledge into large language models (LLMs). However, conventional RAGs struggle to capture",
+    "relevant_doc": "6a1bc7c8d4ba596d472ee9ff",
+    "title": "GFM-RAG: Graph Foundation Model for Retrieval Augmented Generation",
+    "authors": [
+      "Linhao Luo",
+      "Zicheng Zhao",
+      "Gholamreza Haffari",
+      "Dinh Phung",
+      "Chen Gong",
+      "Shirui Pan"
+    ],
+    "year": 2025
+  },
+  {
+    "query": "E-commerce recommendation and search commonly rely on sparse keyword matching (e.g., BM25), which breaks down under vocabulary mismatch when user",
+    "relevant_doc": "6a1bc7d6d4ba596d472eeb97",
+    "title": "Domain-Adaptive and Scalable Dense Retrieval for Content-Based Recommendation",
+    "authors": [
+      "Mritunjay Pandey"
+    ],
+    "year": 2026
+  }
+]

@@ -1,0 +1,20 @@
+timestamp: '2026-06-02T23:56:59.100142'
+d2_complete: true
+corpus:
+  papers: 144
+  chunks: 6858
+graph:
+  paper_nodes: 144
+  author_nodes: 50
+  topic_nodes: 5
+  wrote_edges: 50
+  about_edges: 144
+  cites_edges: 300
+  cites_method: 'synthetic: shared-author OR same-venue + 1-year window'
+gold_set:
+  size: 30
+  source: one chunk per paper, first 20 words as query
+per_query_summary:
+  total_queries: 30
+  all_4_modes_hit: 22
+  rerank_saved_over_dense: 3
