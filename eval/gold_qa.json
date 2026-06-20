@@ -1,0 +1,182 @@
+[
+  {
+    "question": "What is the main contribution described in this paper?",
+    "reference_answer": ". Retrieval-Augmented Generation (RAG) has recently gained traction in natural language processing.",
+    "gold_doc_id": "2405.07437",
+    "gold_pages": [
+      1
+    ],
+    "title": "Evaluation of Retrieval-Augmented Generation: A Survey",
+    "reviewed": false
+  },
+  {
+    "question": "What problem motivates this paper, and what solution does it propose?",
+    "reference_answer": "—Efﬁcient collaboration between collaborative machine learning and wireless communication technology, forming a Federated Edge Learning (FEEL), has spawned a series of next-generation intelligent applications. However, due to the openness of network connections, the FEEL framework generally involves hundreds of remote devices (or clients), resulting in expensive communication costs, which is not friendly to resourceconstrained FEEL.",
+    "gold_doc_id": "2110.07567",
+    "gold_pages": [
+      1
+    ],
+    "title": "Resource-constrained Federated Edge Learning with Heterogeneous Data: Formulation and Analysis",
+    "reviewed": false
+  },
+  {
+    "question": "What is the main contribution described in this paper?",
+    "reference_answer": "Retrieval-Augmented Generation (RAG) has recently emerged as a promising solution to alleviate Large Language Model (LLM)’s deficiency in lack of knowledge. Existing RAG datasets, however, do not adequately represent the diverse and dynamic nature of real-world Question Answering (QA) tasks.",
+    "gold_doc_id": "2406.04744",
+    "gold_pages": [
+      1
+    ],
+    "title": "CRAG -- Comprehensive RAG Benchmark",
+    "reviewed": false
+  },
+  {
+    "question": "What is the main contribution described in this paper?",
+    "reference_answer": "The Internet contains a wealth of knowledge— from the birthdays of historical figures to tutorials on how to code—all of which may be learned by language models. However, while certain pieces of information are ubiquitous on the web, others appear extremely rarely.",
+    "gold_doc_id": "2211.08411",
+    "gold_pages": [
+      1
+    ],
+    "title": "Large Language Models Struggle to Learn Long-Tail Knowledge",
+    "reviewed": false
+  },
+  {
+    "question": "What problem motivates this paper, and what solution does it propose?",
+    "reference_answer": "—Large Language Models (LLMs) showcase impressive capabilities but encounter challenges like hallucination, outdated knowledge, and non-transparent, untraceable reasoning processes. Retrieval-Augmented Generation (RAG) has emerged as a promising solution by incorporating knowledge from external databases.",
+    "gold_doc_id": "2312.10997",
+    "gold_pages": [
+      1
+    ],
+    "title": "Retrieval-Augmented Generation for Large Language Models: A Survey",
+    "reviewed": false
+  },
+  {
+    "question": "What method does this paper introduce, and what is it used for?",
+    "reference_answer": "This research presents and compares multiple approaches to automate the generation of literature reviews using several Natural Language Processing (NLP) techniques and retrieval-augmented generation (RAG) with a Large Language Model (LLM). The ever-increasing number of research articles provides a huge challenge for manual literature review.",
+    "gold_doc_id": "2411.18583",
+    "gold_pages": [
+      0
+    ],
+    "title": "Automated Literature Review Using NLP Techniques and LLM-Based Retrieval-Augmented Generation",
+    "reviewed": false
+  },
+  {
+    "question": "What is the key idea behind the proposed solution for ARES, an Automated RAG Evaluation System?",
+    "reference_answer": "Evaluating retrieval-augmented generation (RAG) systems traditionally relies on hand annotations for input queries, passages to retrieve, and responses to generate. We introduce ARES, an Automated RAG Evaluation System, for evaluating RAG systems along the dimensions of context relevance, answer faithfulness, and answer relevance.",
+    "gold_doc_id": "2311.09476",
+    "gold_pages": [
+      1
+    ],
+    "title": "ARES: An Automated Evaluation Framework for Retrieval-Augmented Generation Systems",
+    "reviewed": false
+  },
+  {
+    "question": "What is the main contribution described in this paper?",
+    "reference_answer": "Document retrieval has been extensively studied within the index-retrieve framework for decades, which has withstood the test of time. Unfortunately, such a pipelined framework limits the optimization of the ﬁnal retrieval quality, because indexing and retrieving are separated stages that can not be jointly optimized in an end-to-end manner.",
+    "gold_doc_id": "2208.09257",
+    "gold_pages": [
+      1
+    ],
+    "title": "Ultron: An Ultimate Retriever on Corpus with a Model-based Indexer",
+    "reviewed": false
+  },
+  {
+    "question": "What problem motivates this paper, and what solution does it propose?",
+    "reference_answer": "Open-domain question answering relies on efﬁcient passage retrieval to select candidate contexts, where traditional sparse vector space models, such as TF-IDF or BM25, are the de facto method. In this work, we show that retrieval can be practically implemented using dense representations alone, where embeddings are learned from a small number of questions and passages by a simple dualencoder framework.",
+    "gold_doc_id": "2004.04906",
+    "gold_pages": [
+      1
+    ],
+    "title": "Dense Passage Retrieval for Open-Domain Question Answering",
+    "reviewed": false
+  },
+  {
+    "question": "What method does this paper introduce, and what is it used for?",
+    "reference_answer": "Recently, retrieval-augmented text generation attracted increasing attention of the computational linguistics community. Compared with conventional generation models, retrievalaugmented text generation has remarkable advantages and particularly has achieved state-ofthe-art performance in many NLP tasks.",
+    "gold_doc_id": "2202.01110",
+    "gold_pages": [
+      1
+    ],
+    "title": "A Survey on Retrieval-Augmented Text Generation",
+    "reviewed": false
+  },
+  {
+    "question": "What is the main contribution described in this paper?",
+    "reference_answer": "As large language models gain widespread adoption, running them efficiently becomes a crucial task. Recent works on LLM inference use speculative decoding to achieve extreme speedups.",
+    "gold_doc_id": "2406.02532",
+    "gold_pages": [
+      1
+    ],
+    "title": "SpecExec: Massively Parallel Speculative Decoding for Interactive LLM Inference on Consumer Devices",
+    "reviewed": false
+  },
+  {
+    "question": "What problem motivates this paper, and what solution does it propose?",
+    "reference_answer": "In recent years, end-to-end steering prediction for autonomous vehicles has become a major area of research. The primary method for achieving end-to-end steering was to use computer vision models on a live feed of video data.",
+    "gold_doc_id": "2310.14162",
+    "gold_pages": [
+      1
+    ],
+    "title": "Augmenting End-to-End Steering Angle Prediction with CAN Bus Data",
+    "reviewed": false
+  },
+  {
+    "question": "What problem motivates this paper, and what solution does it propose?",
+    "reference_answer": "Pre-trained language models have been recently shown to beneﬁt task-oriented dialogue (TOD) systems. Despite their success, existing methods often formulate this task as a cascaded generation problem which can lead to error accumulation across different sub-tasks and greater data annotation overhead.",
+    "gold_doc_id": "2109.14739",
+    "gold_pages": [
+      1
+    ],
+    "title": "Multi-Task Pre-Training for Plug-and-Play Task-Oriented Dialogue System",
+    "reviewed": false
+  },
+  {
+    "question": "What method does this paper introduce, and what is it used for?",
+    "reference_answer": "Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language models (LLMs). However, existing research lacks rigorous evaluation of the impact of retrieval-augmented generation on different large language models, which make it challenging to identify the potential bottlenecks in the capabilities of RAG for different LLMs.",
+    "gold_doc_id": "2309.01431",
+    "gold_pages": [
+      1
+    ],
+    "title": "Benchmarking Large Language Models in Retrieval-Augmented Generation",
+    "reviewed": false
+  },
+  {
+    "question": "What is the main contribution described in this paper?",
+    "reference_answer": "Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety of domains and tasks. Yet, there is a prevalent assumption that they cannot match specialist capabilities without intensive training of models with specialty knowledge.",
+    "gold_doc_id": "2311.16452",
+    "gold_pages": [
+      1
+    ],
+    "title": "Can Generalist Foundation Models Outcompete Special-Purpose Tuning? Case Study in Medicine",
+    "reviewed": false
+  },
+  {
+    "question": "What problem motivates this paper, and what solution does it propose?",
+    "reference_answer": "We study the problem of retrieval with instructions, where users of a retrieval system explicitly describe their intent along with their queries. We aim to develop a general-purpose task-aware retrieval system using multi-task instruction tuning, which can follow humanwritten instructions to ﬁnd the best documents for a given query.",
+    "gold_doc_id": "2211.09260",
+    "gold_pages": [
+      1
+    ],
+    "title": "Task-aware Retrieval with Instructions",
+    "reviewed": false
+  },
+  {
+    "question": "What technique is introduced to improve a two-level attention schema?",
+    "reference_answer": "In this paper, we introduce a two-level attention schema, Poolingformer, for long document modeling. Its ﬁrst level uses a smaller sliding window pattern to aggregate information from neighbors.",
+    "gold_doc_id": "2105.04371",
+    "gold_pages": [
+      1
+    ],
+    "title": "Poolingformer: Long Document Modeling with Pooling Attention",
+    "reviewed": false
+  },
+  {
+    "question": "What method does this paper introduce, and what is it used for?",
+    "reference_answer": "Generative AI models have shown impressive performance on many Natural Language Processing tasks such as language understanding, reasoning, and language generation. An important question being asked by the AI community today is about the capabilities and limits of these models, and it is clear that evaluating generative AI is very challenging.",
+    "gold_doc_id": "2303.12528",
+    "gold_pages": [
+      1
+    ],
+    "title": "MEGA: Multilingual Evaluation of Generative AI",
+    "reviewed": false
+  }
+]
