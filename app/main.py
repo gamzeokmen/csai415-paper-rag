@@ -8,11 +8,9 @@ and AsyncGraphDatabase for async Neo4j queries.
 import os
 import time
 import logging
-from functools import lru_cache
 from typing import Literal, Optional
 from contextlib import asynccontextmanager
 
-import numpy as np
 from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel, Field
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -21,6 +19,10 @@ from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer, CrossEncoder
 from neo4j import AsyncGraphDatabase
 from dotenv import load_dotenv
+
+from app import retrieval as rt
+from app.retrieval import state
+from app.graphrag import GraphRAGExecutor
 
 load_dotenv()
 
@@ -41,9 +43,6 @@ NEO4J_USER      = os.getenv('NEO4J_USERNAME') or os.getenv('NEO4J_USER')
 NEO4J_PASSWORD  = os.getenv('NEO4J_PASSWORD')
 EMBED_MODEL     = 'BAAI/bge-small-en-v1.5'
 RERANK_MODEL    = 'BAAI/bge-reranker-base'
-RRF_K           = 60
-
-state = {}
 
 
 # ── lifespan: load models + connect to stores at startup ────────────────────
@@ -78,6 +77,11 @@ async def lifespan(app: FastAPI):
     state['chunk_lookup'] = {c['chunk_id']: c for c in chunks}
     state['bm25']         = BM25Okapi([c['text'].lower().split() for c in chunks])
     log.info('startup: BM25 index ready (%d chunks)', len(chunks))
+
+    state['graphrag'] = GraphRAGExecutor(
+        neo4j_driver = state['neo4j'],
+        docs_col     = state['db'].documents,
+    )
 
     yield  # ── app runs ────────────────────────────────────────────────────
 
@@ -133,62 +137,12 @@ class StatsResponse(BaseModel):
 
 
 # ── retrieval helpers ───────────────────────────────────────────────────────
-BGE_QUERY_PREFIX = 'Represent this sentence for searching relevant passages: '
-
-BGE_QUERY_PREFIX = 'Represent this sentence for searching relevant passages: '
-
-@lru_cache(maxsize=512)
-def _embed_cached(query: str) -> tuple:
-    """LRU-cached query embedding with BGE query instruction prefix."""
-    prefixed = BGE_QUERY_PREFIX + query
-    return tuple(state['embedder'].encode(prefixed, normalize_embeddings=True).tolist())
-
-
-def _rrf_merge(rankings: list, k: int = RRF_K, top_k: int = 50) -> list:
-    """Reciprocal Rank Fusion."""
-    scores = {}
-    for ranking in rankings:
-        for rank, key in enumerate(ranking, 1):
-            scores[key] = scores.get(key, 0.0) + 1.0 / (k + rank)
-    return [k for k, _ in sorted(scores.items(), key=lambda x: -x[1])[:top_k]]
-
-
-async def _dense_search(query: str, limit: int = 50) -> list:
-    qv = list(_embed_cached(query))
-    response = await state['qdrant'].query_points(
-        collection_name = QDRANT_COLL,
-        query           = qv,
-        limit           = limit,
-    )
-    return [(h.payload['doc_id'], h.payload['chunk_id'], float(h.score)) for h in response.points]
-
-
-def _sparse_search(query: str, limit: int = 50) -> list:
-    bm25 = state['bm25']
-    chunks = state['chunks']
-    scores = bm25.get_scores(query.lower().split())
-    top_idx = np.argsort(scores)[::-1][:limit]
-    return [(chunks[i]['doc_id'], chunks[i]['chunk_id'], float(scores[i]))
-            for i in top_idx]
-
-
-def _rerank(query: str, candidates: list, top_k: int) -> list:
-    """Cross-encoder rerank. candidates: list of (doc_id, chunk_id, score)."""
-    lookup = state['chunk_lookup']
-    pairs, kept = [], []
-    for doc_id, chunk_id, score in candidates:
-        entry = lookup.get(chunk_id)
-        if entry:
-            pairs.append([query, entry['text'][:512]])
-            kept.append((doc_id, chunk_id, score))
-    if not pairs:
-        return []
-    scores = state['reranker'].predict(pairs)
-    paired = sorted(
-        zip(kept, scores),
-        key=lambda x: -x[1]
-    )[:top_k]
-    return [(c[0], c[1], float(s)) for c, s in paired]
+# Dense/sparse search, RRF merge, and rerank now live in app/retrieval.py so
+# app/graphrag.py can reuse them without a circular import with this module.
+_dense_search  = rt.dense_search
+_sparse_search = rt.sparse_search
+_rrf_merge     = rt.rrf_merge
+_rerank        = rt.rerank
 
 
 # ── endpoints ───────────────────────────────────────────────────────────────
