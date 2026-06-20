@@ -102,7 +102,20 @@ def answer_relevance(embedder: SentenceTransformer, question: str, answer_text: 
     return float(np.dot(qv, av))
 
 
-def main() -> int:
+def run_evaluation(arms: list[tuple[str, str, bool]] | None = None) -> tuple[dict, dict]:
+    """Runs every gold question through POST /ask for each (label, mode,
+    rerank) arm and returns (summary, per_arm). Shared by this script's CLI
+    and scripts/ablation_d3.py so both report the same real, freshly-computed
+    numbers rather than duplicating the evaluation logic.
+
+    arms: list of (label, mode, rerank) — label is what shows up in the
+    output (lets ablation_d3.py distinguish e.g. 'hybrid' from
+    'hybrid_no_rerank', both using mode='hybrid'). Defaults to MODES, all
+    with rerank=True.
+    """
+    if arms is None:
+        arms = [(mode, mode, True) for mode in MODES]
+
     gold = json.loads(GOLD_PATH.read_text(encoding='utf-8'))
     print(f'Loaded {len(gold)} gold items from {GOLD_PATH}')
 
@@ -111,16 +124,16 @@ def main() -> int:
     nli = CrossEncoder(NLI_MODEL)
     mongo = MongoClient(MONGO_URI).csai415_rag
 
-    per_mode: dict = {mode: [] for mode in MODES}
+    per_arm: dict = {label: [] for label, _, _ in arms}
 
     with httpx.Client(timeout=60.0) as client:
-        for mode in MODES:
-            print(f'--- mode={mode} ---')
+        for label, mode, rerank in arms:
+            print(f'--- arm={label} (mode={mode}, rerank={rerank}) ---')
             for item in gold:
                 t0 = time.time()
                 r = client.post(
                     f'{BASE}/ask',
-                    json={'query': item['question'], 'mode': mode, 'top_k': TOP_K},
+                    json={'query': item['question'], 'mode': mode, 'top_k': TOP_K, 'rerank': rerank},
                 )
                 r.raise_for_status()
                 body = r.json()
@@ -137,7 +150,7 @@ def main() -> int:
                         context_texts.append(chunk['text'])
 
                 gold_doc_id = item['gold_doc_id']
-                per_mode[mode].append({
+                per_arm[label].append({
                     'question'       : item['question'],
                     'gold_doc_id'    : gold_doc_id,
                     'retrieved_doc_ids': retrieved_doc_ids,
@@ -150,16 +163,16 @@ def main() -> int:
                     'wall_latency_ms': round(wall_ms, 1),
                 })
                 print(f"  q={item['question'][:60]!r:62} "
-                      f"R@5={per_mode[mode][-1]['recall@5']:.0f} "
-                      f"faith={per_mode[mode][-1]['faithfulness']:.2f} "
-                      f"rel={per_mode[mode][-1]['answer_relevance']:.2f} "
+                      f"R@5={per_arm[label][-1]['recall@5']:.0f} "
+                      f"faith={per_arm[label][-1]['faithfulness']:.2f} "
+                      f"rel={per_arm[label][-1]['answer_relevance']:.2f} "
                       f"lat={body['latency_ms']:.0f}ms")
 
     summary = {}
-    for mode in MODES:
-        rows = per_mode[mode]
+    for label, _, _ in arms:
+        rows = per_arm[label]
         latencies = [row['latency_ms'] for row in rows]
-        summary[mode] = {
+        summary[label] = {
             'recall@5'        : float(np.mean([r['recall@5'] for r in rows])),
             'mrr'             : float(np.mean([r['mrr'] for r in rows])),
             'ndcg@5'          : float(np.mean([r['ndcg@5'] for r in rows])),
@@ -169,6 +182,12 @@ def main() -> int:
             'p95_ms'          : float(np.percentile(latencies, 95)),
             'mean_ms'         : float(np.mean(latencies)),
         }
+    return summary, per_arm
+
+
+def main() -> int:
+    summary, per_mode = run_evaluation()
+    gold = json.loads(GOLD_PATH.read_text(encoding='utf-8'))
 
     output = {
         'timestamp'  : datetime.now(timezone.utc).isoformat(),
