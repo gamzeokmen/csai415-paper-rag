@@ -190,11 +190,16 @@ class GraphRAGExecutor:
             })
             excerpts.append(entry['text'])
 
-        answer_text = (
-            '[D3 generator not yet wired — see app/graphrag.py module docstring] '
-            + (excerpts[0][:300] if excerpts else 'No supporting context retrieved.')
-        )
-        return {'answer': answer_text, 'citations': citations, 'generator': 'stub'}
+        # The disclaimer is metadata about the pipeline, not a claim — keep it
+        # out of `answer` so faithfulness/relevance scoring (Step 4) grades
+        # the actual extracted content, not an unrelated bracketed note.
+        answer_text = excerpts[0][:300] if excerpts else 'No supporting context retrieved.'
+        return {
+            'answer'     : answer_text,
+            'citations'  : citations,
+            'generator'  : 'stub',
+            'generator_note': 'D3 generator not yet wired — see app/graphrag.py module docstring',
+        }
 
     # ── orchestration ────────────────────────────────────────────────────────
     async def run(
