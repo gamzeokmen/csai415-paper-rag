@@ -43,6 +43,7 @@ NEO4J_USER      = os.getenv('NEO4J_USERNAME') or os.getenv('NEO4J_USER')
 NEO4J_PASSWORD  = os.getenv('NEO4J_PASSWORD')
 EMBED_MODEL     = 'BAAI/bge-small-en-v1.5'
 RERANK_MODEL    = 'BAAI/bge-reranker-base'
+NLI_MODEL       = 'cross-encoder/nli-deberta-v3-small'
 
 
 # ── lifespan: load models + connect to stores at startup ────────────────────
@@ -51,6 +52,9 @@ async def lifespan(app: FastAPI):
     log.info('startup: loading embedder + reranker (first run downloads ~480 MB)')
     state['embedder'] = SentenceTransformer(EMBED_MODEL)
     state['reranker'] = CrossEncoder(RERANK_MODEL, max_length=512)
+
+    log.info('startup: loading NLI cross-encoder for D3 provenance filtering')
+    state['nli'] = CrossEncoder(NLI_MODEL)
 
     log.info('startup: connecting to MongoDB at %s', MONGO_URI)
     state['mongo'] = AsyncIOMotorClient(MONGO_URI)
