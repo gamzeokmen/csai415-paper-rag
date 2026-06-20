@@ -53,10 +53,18 @@ _QUESTION_TEMPLATES = [
 ]
 
 _GENERIC_FALLBACK_TEMPLATES = [
-    'What problem motivates this paper, and what solution does it propose?',
-    'What is the main contribution described in this paper?',
-    'What method does this paper introduce, and what is it used for?',
+    'What problem related to {topic} motivates this paper, and what solution does it propose?',
+    'What is the main contribution of this paper regarding {topic}?',
+    'What method does this paper introduce for {topic}, and what is it used for?',
 ]
+
+# Stripped from the front of a sentence before using it as a topic anchor —
+# these carry no topical content and would otherwise leak into every anchor.
+_LEAD_IN_RE = re.compile(
+    r'^(in this (?:paper|work),?\s*|recently,?\s*|in recent years,?\s*|'
+    r'despite[^,]*,\s*|however,?\s*)',
+    re.IGNORECASE,
+)
 
 # Corpus is supposed to be ~144 papers on RAG/retrieval research, but contains
 # some off-topic papers (e.g. particle physics, pure math) that slipped into
@@ -89,7 +97,12 @@ def extract_abstract_text(db, doc_id: str) -> tuple[str, int] | None:
     marker = text.find('Abstract')
     if marker == -1:
         return None
-    return text[marker + len('Abstract'):].strip(), first_chunk['page_num']
+    # PDF extraction sometimes leaves a stray leading punctuation artifact
+    # right after "Abstract" (e.g. "Abstract\n. Retrieval-Augmented...") —
+    # strip it so downstream sentence splitting doesn't produce an empty
+    # first "sentence".
+    after = text[marker + len('Abstract'):].lstrip(' \n\r\t.—–:-')
+    return after, first_chunk['page_num']
 
 
 def first_sentences(text: str, n: int = 2) -> str:
@@ -97,12 +110,30 @@ def first_sentences(text: str, n: int = 2) -> str:
     return ' '.join(sentences[:n]).strip()
 
 
+def topic_anchor(reference_answer: str) -> str:
+    """A short, real, paper-specific phrase to anchor the fallback question on
+    — without this, every fallback question collapses to the same handful of
+    generic strings (e.g. "What is the main contribution of this paper?"
+    asked identically for 6 different papers), which carries zero signal for
+    retrieval to disambiguate. Confirmed empirically: scripts/evaluate_d3.py's
+    first run scored ~0.06-0.11 Recall@5 almost entirely because of this."""
+    first = reference_answer.split('. ')[0]
+    first = _LEAD_IN_RE.sub('', first).strip()
+    words = first.split()[:14]
+    anchor = ' '.join(words).rstrip('.,;:')
+    if anchor:
+        return anchor
+    # defensive fallback if the above ever yields nothing usable
+    return ' '.join(reference_answer.split()[:10]).rstrip('.,;:')
+
+
 def draft_question(reference_answer: str, rng: random.Random) -> str:
     m = _CONTRIBUTION_RE.search(reference_answer)
     if m:
         topic = m.group(1).strip().rstrip('.,;')
         return rng.choice(_QUESTION_TEMPLATES).format(topic=topic)
-    return rng.choice(_GENERIC_FALLBACK_TEMPLATES)
+    topic = topic_anchor(reference_answer)
+    return rng.choice(_GENERIC_FALLBACK_TEMPLATES).format(topic=topic)
 
 
 def main() -> int:
@@ -139,6 +170,12 @@ def main() -> int:
             'title'           : title,
             'reviewed'        : False,
         })
+
+    questions = [g['question'] for g in gold]
+    duplicates = {q for q in questions if questions.count(q) > 1}
+    if duplicates:
+        print(f'WARNING: {len(duplicates)} duplicate question string(s) — these carry no '
+              f'paper-specific signal and will break retrieval evaluation: {duplicates}')
 
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(json.dumps(gold, indent=2, ensure_ascii=False), encoding='utf-8')
