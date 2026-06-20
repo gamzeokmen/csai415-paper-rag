@@ -54,6 +54,16 @@ def test_search_all_modes():
         assert len(body['results']) <= 5
 
 
+def test_search_results_have_resolvable_chunk_id_and_page():
+    r = httpx.get(f'{BASE}/search', params={'q': 'retrieval augmented generation', 'top_k': 5})
+    assert r.status_code == 200
+    results = r.json()['results']
+    assert len(results) > 0
+    for result in results:
+        assert result['chunk_id'], 'chunk_id must be present and non-empty'
+        assert result['page_num'] is not None, 'page_num must resolve, not be null'
+
+
 def test_search_validates_top_k():
     r = httpx.get(f'{BASE}/search', params={'q': 'test', 'top_k': 999})
     assert r.status_code == 422  # validation error
