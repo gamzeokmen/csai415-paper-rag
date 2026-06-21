@@ -69,13 +69,14 @@ async def lifespan(app: FastAPI):
 
     log.info('startup: building in-memory BM25 index from MongoDB chunks')
     chunks = []
-    cursor = state['db'].chunks.find({}, {'doc_id': 1, 'chunk_idx': 1, 'text': 1})
+    cursor = state['db'].chunks.find(
+        {}, {'doc_id': 1, 'chunk_id': 1, 'page_num': 1, 'chunk_seq': 1, 'text': 1}
+    )
     async for c in cursor:
         chunks.append(c)
-    state['chunks']     = chunks
-    state['chunk_lookup'] = {(c['doc_id'], c.get('chunk_idx', i)): c['text']
-                              for i, c in enumerate(chunks)}
-    state['bm25']       = BM25Okapi([c['text'].lower().split() for c in chunks])
+    state['chunks']       = chunks
+    state['chunk_lookup'] = {c['chunk_id']: c for c in chunks}
+    state['bm25']         = BM25Okapi([c['text'].lower().split() for c in chunks])
     log.info('startup: BM25 index ready (%d chunks)', len(chunks))
 
     yield  # ── app runs ────────────────────────────────────────────────────
@@ -99,7 +100,8 @@ app = FastAPI(
 # ── pydantic models ─────────────────────────────────────────────────────────
 class ChunkResult(BaseModel):
     doc_id      : str
-    chunk_idx   : int
+    chunk_id    : str
+    page_num    : Optional[int] = None
     text        : str
     score       : float
     rerank_score: Optional[float] = None
@@ -158,7 +160,7 @@ async def _dense_search(query: str, limit: int = 50) -> list:
         query           = qv,
         limit           = limit,
     )
-    return [(h.payload['doc_id'], h.payload.get('chunk_idx', 0), float(h.score)) for h in response.points]
+    return [(h.payload['doc_id'], h.payload['chunk_id'], float(h.score)) for h in response.points]
 
 
 def _sparse_search(query: str, limit: int = 50) -> list:
@@ -166,19 +168,19 @@ def _sparse_search(query: str, limit: int = 50) -> list:
     chunks = state['chunks']
     scores = bm25.get_scores(query.lower().split())
     top_idx = np.argsort(scores)[::-1][:limit]
-    return [(chunks[i]['doc_id'], chunks[i].get('chunk_idx', i), float(scores[i]))
+    return [(chunks[i]['doc_id'], chunks[i]['chunk_id'], float(scores[i]))
             for i in top_idx]
 
 
 def _rerank(query: str, candidates: list, top_k: int) -> list:
-    """Cross-encoder rerank. candidates: list of (doc_id, chunk_idx, score)."""
+    """Cross-encoder rerank. candidates: list of (doc_id, chunk_id, score)."""
     lookup = state['chunk_lookup']
     pairs, kept = [], []
-    for doc_id, chunk_idx, score in candidates:
-        text = lookup.get((doc_id, chunk_idx))
-        if text:
-            pairs.append([query, text[:512]])
-            kept.append((doc_id, chunk_idx, score))
+    for doc_id, chunk_id, score in candidates:
+        entry = lookup.get(chunk_id)
+        if entry:
+            pairs.append([query, entry['text'][:512]])
+            kept.append((doc_id, chunk_id, score))
     if not pairs:
         return []
     scores = state['reranker'].predict(pairs)
@@ -216,12 +218,13 @@ async def search(
     else:
         d = await _dense_search(q, limit=50)
         s = _sparse_search(q, limit=50)
-        # build keyed ranking for RRF
-        d_keys = [(x[0], x[1]) for x in d]
-        s_keys = [(x[0], x[1]) for x in s]
+        # RRF merges on chunk_id alone — it already uniquely identifies (doc_id, chunk)
+        d_keys = [x[1] for x in d]
+        s_keys = [x[1] for x in s]
         merged_keys = _rrf_merge([d_keys, s_keys], top_k=50)
-        score_map = {(x[0], x[1]): x[2] for x in d}
-        candidates = [(k[0], k[1], score_map.get(k, 0.0)) for k in merged_keys]
+        doc_map   = {x[1]: x[0] for x in d} | {x[1]: x[0] for x in s}
+        score_map = {x[1]: x[2] for x in d}
+        candidates = [(doc_map[k], k, score_map.get(k, 0.0)) for k in merged_keys]
 
     if rerank:
         candidates = _rerank(q, candidates[:20], top_k=top_k)
@@ -231,12 +234,14 @@ async def search(
     # hydrate with MongoDB metadata
     results = []
     seen_docs = set()
-    for doc_id, chunk_idx, score in candidates:
-        text = state['chunk_lookup'].get((doc_id, chunk_idx), '')
+    for doc_id, chunk_id, score in candidates:
+        entry = state['chunk_lookup'].get(chunk_id, {})
+        text  = entry.get('text', '')
         doc = await state['db'].documents.find_one({'doc_id': doc_id})
         results.append(ChunkResult(
             doc_id       = str(doc_id),
-            chunk_idx    = int(chunk_idx),
+            chunk_id     = chunk_id,
+            page_num     = entry.get('page_num'),
             text         = text[:400] + ('...' if len(text) > 400 else ''),
             score        = score if not rerank else 0.0,
             rerank_score = score if rerank else None,
