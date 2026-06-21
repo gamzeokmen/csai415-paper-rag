@@ -38,10 +38,15 @@ Key debugging sessions included: Docker volume/database name mismatches, qdrant-
 
 ### Chat 4 — D3 GraphRAG executor, evaluation, safety, and generator integration
 
-This was a Claude Code (CLI) session, not a claude.ai web chat, so no shareable
-link exists for it — Claude Code sessions run against a local repository
-checkout and don't generate a `claude.ai/share/...` URL. Instead, the full
-session transcript is included directly in this repo:
+This was the primary D3 development chat, driven end-to-end by **Kenan
+Almukhllati**, covering the full D3 scope in one continuous session: GraphRAG
+executor design, evaluation harness, safety mitigations, ablation study,
+hygiene/documentation pass, and the LLM generator integration. It was run via
+Claude Code (CLI), not a claude.ai web chat, so no shareable
+`claude.ai/share/...` link exists for it — Claude Code sessions run against a
+local repository checkout instead. The full session transcript is included
+directly in this repo so the same level of detail D1/D2's share links provide
+is still available:
 
 **Full transcript:** [`D3_chat_log.md`](D3_chat_log.md) — a cleaned, readable
 export of the complete local session log (74 exchanges). Typos and informal
