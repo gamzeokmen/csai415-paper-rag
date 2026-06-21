@@ -30,6 +30,7 @@ import time
 from typing import Literal, Optional
 
 from app import retrieval as rt
+from app import safety
 
 log = logging.getLogger('csai415_rag.graphrag')
 
@@ -174,13 +175,28 @@ class GraphRAGExecutor:
         is a deterministic extractive stand-in so the citation/page-range
         mechanics are real and testable now, independent of the generator
         decision.
+
+        Two D3 safety mitigations operate here (app/safety.py):
+        (1) prompt-injection defense — any candidate chunk whose text matches
+        a known injection pattern is skipped entirely (never becomes a
+        citation or part of the answer), and the next-best candidate
+        backfills its place; (2) provenance filtering — the extracted answer
+        is run through the NLI-entailment proxy and any sentence not
+        entailed by the cited context is dropped before returning.
         """
         citations = []
         excerpts = []
-        for doc_id, chunk_id, _score in ranked_chunks[:top_n_context]:
+        flagged = []
+        for doc_id, chunk_id, _score in ranked_chunks:
+            if len(citations) >= top_n_context:
+                break
             entry = rt.state['chunk_lookup'].get(chunk_id)
             if not entry:
                 continue
+            injection_hits = safety.detect_injection(entry['text'])
+            if injection_hits:
+                flagged.append({'doc_id': doc_id, 'chunk_id': chunk_id, 'patterns': injection_hits})
+                continue  # never let a poisoned chunk become a citation or part of the answer
             doc = await self.docs_col.find_one({'doc_id': doc_id})
             citations.append({
                 'doc_id'  : doc_id,
@@ -193,12 +209,27 @@ class GraphRAGExecutor:
         # The disclaimer is metadata about the pipeline, not a claim — keep it
         # out of `answer` so faithfulness/relevance scoring (Step 4) grades
         # the actual extracted content, not an unrelated bracketed note.
-        answer_text = excerpts[0][:300] if excerpts else 'No supporting context retrieved.'
+        if not excerpts:
+            answer_text = 'No supporting context retrieved.'
+            provenance = {'dropped': [], 'grounded_fraction': 0.0}
+        else:
+            raw_answer = excerpts[0][:300]
+            provenance = safety.filter_ungrounded(rt.state.get('nli'), raw_answer, excerpts)
+            # Note: never fall back to raw_answer here — if nothing survived
+            # the filter, the extracted excerpt wasn't verifiably grounded,
+            # and silently returning it anyway would defeat the mitigation.
+            answer_text = provenance['filtered_answer'] or (
+                '[provenance filter] No sentence in the extracted excerpt '
+                'could be verified as grounded in the retrieved context.'
+            )
+
         return {
-            'answer'     : answer_text,
-            'citations'  : citations,
-            'generator'  : 'stub',
+            'answer'        : answer_text,
+            'citations'     : citations,
+            'generator'     : 'stub',
             'generator_note': 'D3 generator not yet wired — see app/graphrag.py module docstring',
+            'safety_flagged': flagged,
+            'grounded_fraction': provenance['grounded_fraction'],
         }
 
     # ── orchestration ────────────────────────────────────────────────────────
@@ -245,13 +276,16 @@ class GraphRAGExecutor:
             merged = self.blend(vector_candidates, graph_candidates)
         steps.append({'stage': 'blend', 'mode': mode, 'merged_candidates': len(merged)})
 
+        # request a slightly wider pool than top_k so answer() can backfill
+        # if a top candidate gets skipped by the prompt-injection filter
+        backfill_k = max(top_k * 2, 10)
         if rerank:
-            merged = rt.rerank(query, merged[:20], top_k=top_k)
+            merged = rt.rerank(query, merged[:20], top_k=backfill_k)
             steps.append({'stage': 'rerank', 'final_count': len(merged)})
         else:
-            merged = merged[:top_k]
+            merged = merged[:backfill_k]
             steps.append({'stage': 'truncate', 'final_count': len(merged)})
 
-        result = await self.answer(query, merged)
+        result = await self.answer(query, merged, top_n_context=top_k)
         latency_ms = round((time.time() - t0) * 1000, 1)
         return {'query': query, 'mode': mode, 'steps': steps, 'latency_ms': latency_ms, **result}
