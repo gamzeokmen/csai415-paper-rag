@@ -130,6 +130,29 @@ class FeedbackRequest(BaseModel):
     relevant: bool   = Field(...)
 
 
+class AskRequest(BaseModel):
+    query : str = Field(..., min_length=1)
+    mode  : Literal['vector_only', 'graph_guided', 'hybrid'] = 'hybrid'
+    top_k : int = Field(5, ge=1, le=20)
+    rerank: bool = True
+
+
+class Citation(BaseModel):
+    doc_id  : str
+    chunk_id: str
+    title   : Optional[str] = None
+    pages   : list[Optional[int]]
+
+
+class AskResponse(BaseModel):
+    query     : str
+    mode      : str
+    answer    : str
+    citations : list[Citation]
+    steps     : list[dict]
+    latency_ms: float
+
+
 class StatsResponse(BaseModel):
     papers : int
     chunks : int
@@ -249,6 +272,26 @@ async def feedback(req: FeedbackRequest):
         'timestamp': time.time(),
     })
     return {'stored': True}
+
+
+@app.post('/ask', response_model=AskResponse, tags=['ask'])
+async def ask(req: AskRequest):
+    """D3 GraphRAG executor: subgraph selection -> chunk expansion -> blend ->
+    answer. `steps` exposes the agent's stage trace; `citations` carry real
+    page numbers. `answer` is currently a deterministic extractive stand-in
+    (see app/graphrag.py module docstring) until the LLM generator is wired
+    up — citations and page ranges are real, not stubbed."""
+    result = await state['graphrag'].run(
+        req.query, mode=req.mode, top_k=req.top_k, rerank=req.rerank
+    )
+    return AskResponse(
+        query      = result['query'],
+        mode       = result['mode'],
+        answer     = result['answer'],
+        citations  = result['citations'],
+        steps      = result['steps'],
+        latency_ms = result['latency_ms'],
+    )
 
 
 @app.get('/stats', response_model=StatsResponse, tags=['health'])

@@ -104,6 +104,7 @@ GET  /search                  q, mode (dense|sparse|hybrid), top_k, rerank
 GET  /documents               paginated paper list
 GET  /document/{doc_id}       single paper metadata + chunk count
 POST /feedback                store relevance signal for D3
+POST /ask                     D3 GraphRAG executor — query, mode (vector_only|graph_guided|hybrid), top_k, rerank
 GET  /graph/topics            topic distribution (Cypher Query 3)
 GET  /graph/authors           top authors by paper count (Cypher Query 1)
 GET  /graph/cites             most-cited papers (Cypher Query 6)
