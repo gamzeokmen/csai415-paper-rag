@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-06-20T22:47:42.184300+00:00",
+  "timestamp": "2026-06-20T23:19:45.073242+00:00",
   "gold_set_size": 18,
   "top_k": 5,
   "embedding_model": "BAAI/bge-small-en-v1.5",
@@ -12,9 +12,9 @@
       "ndcg@5": 1.0,
       "faithfulness": 0.3333333333333333,
       "answer_relevance": 0.6290721131695641,
-      "p50_ms": 5834.45,
-      "p95_ms": 7195.67,
-      "mean_ms": 5968.605555555555
+      "p50_ms": 4504.1,
+      "p95_ms": 5340.44,
+      "mean_ms": 4606.316666666667
     },
     "graph_guided": {
       "recall@5": 0.05555555555555555,
@@ -22,9 +22,9 @@
       "ndcg@5": 0.05555555555555555,
       "faithfulness": 0.3888888888888889,
       "answer_relevance": 0.609935869773229,
-      "p50_ms": 6929.45,
-      "p95_ms": 10014.094999999996,
-      "mean_ms": 7359.144444444445
+      "p50_ms": 5151.700000000001,
+      "p95_ms": 7418.819999999997,
+      "mean_ms": 5386.7555555555555
     },
     "hybrid": {
       "recall@5": 1.0,
@@ -32,9 +32,9 @@
       "ndcg@5": 1.0,
       "faithfulness": 0.3333333333333333,
       "answer_relevance": 0.6290721131695641,
-      "p50_ms": 6241.4,
-      "p95_ms": 8155.2199999999975,
-      "mean_ms": 6417.544444444446
+      "p50_ms": 4772.5,
+      "p95_ms": 6183.939999999998,
+      "mean_ms": 4911.233333333334
     }
   },
   "per_query": {
@@ -54,8 +54,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6493163108825684,
-        "latency_ms": 6164.4,
-        "wall_latency_ms": 8218.8
+        "latency_ms": 5111.4,
+        "wall_latency_ms": 7160.8
       },
       {
         "question": "What problem related to Efﬁcient collaboration between collaborative machine learning and wireless communication technology, forming a Federated Edge motivates this paper, and what solution does it propose?",
@@ -68,8 +68,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.4895182251930237,
-        "latency_ms": 6319.3,
-        "wall_latency_ms": 6322.3
+        "latency_ms": 5263.1,
+        "wall_latency_ms": 5265.1
       },
       {
         "question": "What is the main contribution of this paper regarding Retrieval-Augmented Generation (RAG) has recently emerged as a promising solution to alleviate Large Language?",
@@ -86,8 +86,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.5966166257858276,
-        "latency_ms": 7430.1,
-        "wall_latency_ms": 7432.1
+        "latency_ms": 5778.7,
+        "wall_latency_ms": 5780.8
       },
       {
         "question": "What is the main contribution of this paper regarding The Internet contains a wealth of knowledge— from the birthdays of historical figures to?",
@@ -103,8 +103,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.44207531213760376,
-        "latency_ms": 5037.2,
-        "wall_latency_ms": 5039.2
+        "latency_ms": 3686.1,
+        "wall_latency_ms": 3689.1
       },
       {
         "question": "What problem related to Large Language Models (LLMs) showcase impressive capabilities but encounter challenges like hallucination, outdated knowledge motivates this paper, and what solution does it propose?",
@@ -121,8 +121,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7121863961219788,
-        "latency_ms": 6912.3,
-        "wall_latency_ms": 6914.4
+        "latency_ms": 5076.8,
+        "wall_latency_ms": 5078.8
       },
       {
         "question": "What method does this paper introduce for This research presents and compares multiple approaches to automate the generation of literature reviews, and what is it used for?",
@@ -135,8 +135,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.5705211162567139,
-        "latency_ms": 5450.0,
-        "wall_latency_ms": 5452.0
+        "latency_ms": 4117.5,
+        "wall_latency_ms": 4119.5
       },
       {
         "question": "What is the key idea behind the proposed solution for ARES, an Automated RAG Evaluation System?",
@@ -150,8 +150,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.5391906499862671,
-        "latency_ms": 5154.9,
-        "wall_latency_ms": 5158.5
+        "latency_ms": 3922.8,
+        "wall_latency_ms": 3924.8
       },
       {
         "question": "What is the main contribution of this paper regarding Document retrieval has been extensively studied within the index-retrieve framework for decades, which has?",
@@ -167,8 +167,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.571821391582489,
-        "latency_ms": 5581.2,
-        "wall_latency_ms": 5583.2
+        "latency_ms": 4489.9,
+        "wall_latency_ms": 4491.9
       },
       {
         "question": "What problem related to Open-domain question answering relies on efﬁcient passage retrieval to select candidate contexts, where traditional motivates this paper, and what solution does it propose?",
@@ -185,8 +185,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.8747159838676453,
-        "latency_ms": 5476.2,
-        "wall_latency_ms": 5478.2
+        "latency_ms": 4005.6,
+        "wall_latency_ms": 4008.6
       },
       {
         "question": "What method does this paper introduce for retrieval-augmented text generation attracted increasing attention of the computational linguistics community, and what is it used for?",
@@ -201,8 +201,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6472440958023071,
-        "latency_ms": 5918.0,
-        "wall_latency_ms": 5920.1
+        "latency_ms": 4594.0,
+        "wall_latency_ms": 4597.0
       },
       {
         "question": "What is the main contribution of this paper regarding As large language models gain widespread adoption, running them efficiently becomes a crucial task?",
@@ -219,8 +219,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.6315959095954895,
-        "latency_ms": 5659.8,
-        "wall_latency_ms": 5661.8
+        "latency_ms": 4241.4,
+        "wall_latency_ms": 4243.4
       },
       {
         "question": "What problem related to end-to-end steering prediction for autonomous vehicles has become a major area of research motivates this paper, and what solution does it propose?",
@@ -235,8 +235,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.865169882774353,
-        "latency_ms": 6512.6,
-        "wall_latency_ms": 6515.7
+        "latency_ms": 5081.7,
+        "wall_latency_ms": 5083.7
       },
       {
         "question": "What problem related to Pre-trained language models have been recently shown to beneﬁt task-oriented dialogue (TOD) systems motivates this paper, and what solution does it propose?",
@@ -250,8 +250,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6726757884025574,
-        "latency_ms": 5750.9,
-        "wall_latency_ms": 5753.9
+        "latency_ms": 4392.0,
+        "wall_latency_ms": 4393.5
       },
       {
         "question": "What method does this paper introduce for Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language, and what is it used for?",
@@ -267,8 +267,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6043576598167419,
-        "latency_ms": 6243.8,
-        "wall_latency_ms": 6245.8
+        "latency_ms": 4989.9,
+        "wall_latency_ms": 4990.9
       },
       {
         "question": "What is the main contribution of this paper regarding Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety?",
@@ -283,8 +283,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.4673616886138916,
-        "latency_ms": 6064.4,
-        "wall_latency_ms": 6066.4
+        "latency_ms": 4516.9,
+        "wall_latency_ms": 4518.9
       },
       {
         "question": "What problem related to We study the problem of retrieval with instructions, where users of a retrieval system motivates this paper, and what solution does it propose?",
@@ -299,8 +299,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6032289266586304,
-        "latency_ms": 5010.8,
-        "wall_latency_ms": 5013.8
+        "latency_ms": 3919.1,
+        "wall_latency_ms": 3921.1
       },
       {
         "question": "What technique is introduced to improve a two-level attention schema?",
@@ -313,8 +313,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7924169898033142,
-        "latency_ms": 7154.3,
-        "wall_latency_ms": 7156.3
+        "latency_ms": 5235.5,
+        "wall_latency_ms": 5237.5
       },
       {
         "question": "What method does this paper introduce for Generative AI models have shown impressive performance on many Natural Language Processing tasks such, and what is it used for?",
@@ -331,8 +331,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.593285083770752,
-        "latency_ms": 5594.7,
-        "wall_latency_ms": 5596.7
+        "latency_ms": 4491.3,
+        "wall_latency_ms": 4493.3
       }
     ],
     "graph_guided": [
@@ -350,8 +350,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6493163108825684,
-        "latency_ms": 7686.8,
-        "wall_latency_ms": 7688.8
+        "latency_ms": 5727.8,
+        "wall_latency_ms": 5729.8
       },
       {
         "question": "What problem related to Efﬁcient collaboration between collaborative machine learning and wireless communication technology, forming a Federated Edge motivates this paper, and what solution does it propose?",
@@ -367,8 +367,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.4895182251930237,
-        "latency_ms": 6936.0,
-        "wall_latency_ms": 6938.5
+        "latency_ms": 5087.2,
+        "wall_latency_ms": 5089.2
       },
       {
         "question": "What is the main contribution of this paper regarding Retrieval-Augmented Generation (RAG) has recently emerged as a promising solution to alleviate Large Language?",
@@ -383,8 +383,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.5966166257858276,
-        "latency_ms": 8413.1,
-        "wall_latency_ms": 8414.1
+        "latency_ms": 6253.2,
+        "wall_latency_ms": 6254.8
       },
       {
         "question": "What is the main contribution of this paper regarding The Internet contains a wealth of knowledge— from the birthdays of historical figures to?",
@@ -400,8 +400,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.46304023265838623,
-        "latency_ms": 7568.2,
-        "wall_latency_ms": 7571.2
+        "latency_ms": 5701.9,
+        "wall_latency_ms": 5703.9
       },
       {
         "question": "What problem related to Large Language Models (LLMs) showcase impressive capabilities but encounter challenges like hallucination, outdated knowledge motivates this paper, and what solution does it propose?",
@@ -418,8 +418,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6072992086410522,
-        "latency_ms": 9574.4,
-        "wall_latency_ms": 9577.6
+        "latency_ms": 7131.9,
+        "wall_latency_ms": 7134.9
       },
       {
         "question": "What method does this paper introduce for This research presents and compares multiple approaches to automate the generation of literature reviews, and what is it used for?",
@@ -436,8 +436,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7769207954406738,
-        "latency_ms": 6147.1,
-        "wall_latency_ms": 6150.1
+        "latency_ms": 4083.7,
+        "wall_latency_ms": 4085.7
       },
       {
         "question": "What is the key idea behind the proposed solution for ARES, an Automated RAG Evaluation System?",
@@ -452,8 +452,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.5391906499862671,
-        "latency_ms": 6673.1,
-        "wall_latency_ms": 6675.1
+        "latency_ms": 5576.4,
+        "wall_latency_ms": 5578.4
       },
       {
         "question": "What is the main contribution of this paper regarding Document retrieval has been extensively studied within the index-retrieve framework for decades, which has?",
@@ -469,8 +469,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.571821391582489,
-        "latency_ms": 6847.8,
-        "wall_latency_ms": 6849.8
+        "latency_ms": 4685.9,
+        "wall_latency_ms": 4687.9
       },
       {
         "question": "What problem related to Open-domain question answering relies on efﬁcient passage retrieval to select candidate contexts, where traditional motivates this paper, and what solution does it propose?",
@@ -484,8 +484,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6599096059799194,
-        "latency_ms": 5431.5,
-        "wall_latency_ms": 5433.5
+        "latency_ms": 4686.5,
+        "wall_latency_ms": 4688.1
       },
       {
         "question": "What method does this paper introduce for retrieval-augmented text generation attracted increasing attention of the computational linguistics community, and what is it used for?",
@@ -501,8 +501,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6472440958023071,
-        "latency_ms": 6764.4,
-        "wall_latency_ms": 6766.4
+        "latency_ms": 4379.6,
+        "wall_latency_ms": 4381.6
       },
       {
         "question": "What is the main contribution of this paper regarding As large language models gain widespread adoption, running them efficiently becomes a crucial task?",
@@ -516,8 +516,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7656679749488831,
-        "latency_ms": 6157.1,
-        "wall_latency_ms": 6159.1
+        "latency_ms": 4339.6,
+        "wall_latency_ms": 4342.2
       },
       {
         "question": "What problem related to end-to-end steering prediction for autonomous vehicles has become a major area of research motivates this paper, and what solution does it propose?",
@@ -532,8 +532,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.5121779441833496,
-        "latency_ms": 7968.0,
-        "wall_latency_ms": 7971.1
+        "latency_ms": 5556.1,
+        "wall_latency_ms": 5558.1
       },
       {
         "question": "What problem related to Pre-trained language models have been recently shown to beneﬁt task-oriented dialogue (TOD) systems motivates this paper, and what solution does it propose?",
@@ -548,8 +548,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6726757884025574,
-        "latency_ms": 5906.2,
-        "wall_latency_ms": 5908.2
+        "latency_ms": 4201.9,
+        "wall_latency_ms": 4203.9
       },
       {
         "question": "What method does this paper introduce for Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language, and what is it used for?",
@@ -565,8 +565,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7481235265731812,
-        "latency_ms": 6922.9,
-        "wall_latency_ms": 6925.9
+        "latency_ms": 5183.3,
+        "wall_latency_ms": 5185.3
       },
       {
         "question": "What is the main contribution of this paper regarding Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety?",
@@ -581,8 +581,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.4673616886138916,
-        "latency_ms": 6675.6,
-        "wall_latency_ms": 6678.1
+        "latency_ms": 4628.7,
+        "wall_latency_ms": 4630.7
       },
       {
         "question": "What problem related to We study the problem of retrieval with instructions, where users of a retrieval system motivates this paper, and what solution does it propose?",
@@ -596,8 +596,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.6689352989196777,
-        "latency_ms": 7230.2,
-        "wall_latency_ms": 7232.2
+        "latency_ms": 5120.1,
+        "wall_latency_ms": 5122.1
       },
       {
         "question": "What technique is introduced to improve a two-level attention schema?",
@@ -613,8 +613,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.5497412085533142,
-        "latency_ms": 7056.5,
-        "wall_latency_ms": 7059.1
+        "latency_ms": 5573.1,
+        "wall_latency_ms": 5575.6
       },
       {
         "question": "What method does this paper introduce for Generative AI models have shown impressive performance on many Natural Language Processing tasks such, and what is it used for?",
@@ -630,8 +630,8 @@
         "ndcg@5": 0.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.593285083770752,
-        "latency_ms": 12505.7,
-        "wall_latency_ms": 12507.7
+        "latency_ms": 9044.7,
+        "wall_latency_ms": 9046.7
       }
     ],
     "hybrid": [
@@ -650,8 +650,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6493163108825684,
-        "latency_ms": 6849.4,
-        "wall_latency_ms": 6851.4
+        "latency_ms": 4432.1,
+        "wall_latency_ms": 4434.1
       },
       {
         "question": "What problem related to Efﬁcient collaboration between collaborative machine learning and wireless communication technology, forming a Federated Edge motivates this paper, and what solution does it propose?",
@@ -664,8 +664,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.4895182251930237,
-        "latency_ms": 6564.7,
-        "wall_latency_ms": 6566.7
+        "latency_ms": 5131.1,
+        "wall_latency_ms": 5134.0
       },
       {
         "question": "What is the main contribution of this paper regarding Retrieval-Augmented Generation (RAG) has recently emerged as a promising solution to alleviate Large Language?",
@@ -681,8 +681,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.5966166257858276,
-        "latency_ms": 7865.3,
-        "wall_latency_ms": 7867.3
+        "latency_ms": 5887.6,
+        "wall_latency_ms": 5890.6
       },
       {
         "question": "What is the main contribution of this paper regarding The Internet contains a wealth of knowledge— from the birthdays of historical figures to?",
@@ -699,8 +699,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.44207531213760376,
-        "latency_ms": 6537.1,
-        "wall_latency_ms": 6540.1
+        "latency_ms": 5038.5,
+        "wall_latency_ms": 5041.5
       },
       {
         "question": "What problem related to Large Language Models (LLMs) showcase impressive capabilities but encounter challenges like hallucination, outdated knowledge motivates this paper, and what solution does it propose?",
@@ -717,8 +717,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7121863961219788,
-        "latency_ms": 6930.8,
-        "wall_latency_ms": 6933.3
+        "latency_ms": 5358.5,
+        "wall_latency_ms": 5361.0
       },
       {
         "question": "What method does this paper introduce for This research presents and compares multiple approaches to automate the generation of literature reviews, and what is it used for?",
@@ -731,8 +731,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.5705211162567139,
-        "latency_ms": 5733.9,
-        "wall_latency_ms": 5735.9
+        "latency_ms": 4861.5,
+        "wall_latency_ms": 4863.5
       },
       {
         "question": "What is the key idea behind the proposed solution for ARES, an Automated RAG Evaluation System?",
@@ -747,8 +747,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.5391906499862671,
-        "latency_ms": 5547.7,
-        "wall_latency_ms": 5549.7
+        "latency_ms": 3733.5,
+        "wall_latency_ms": 3735.5
       },
       {
         "question": "What is the main contribution of this paper regarding Document retrieval has been extensively studied within the index-retrieve framework for decades, which has?",
@@ -764,8 +764,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.571821391582489,
-        "latency_ms": 5577.2,
-        "wall_latency_ms": 5579.2
+        "latency_ms": 4811.8,
+        "wall_latency_ms": 4813.8
       },
       {
         "question": "What problem related to Open-domain question answering relies on efﬁcient passage retrieval to select candidate contexts, where traditional motivates this paper, and what solution does it propose?",
@@ -781,8 +781,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.8747159838676453,
-        "latency_ms": 5975.9,
-        "wall_latency_ms": 5977.9
+        "latency_ms": 4613.7,
+        "wall_latency_ms": 4616.2
       },
       {
         "question": "What method does this paper introduce for retrieval-augmented text generation attracted increasing attention of the computational linguistics community, and what is it used for?",
@@ -797,8 +797,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6472440958023071,
-        "latency_ms": 5253.4,
-        "wall_latency_ms": 5257.4
+        "latency_ms": 4150.4,
+        "wall_latency_ms": 4153.4
       },
       {
         "question": "What is the main contribution of this paper regarding As large language models gain widespread adoption, running them efficiently becomes a crucial task?",
@@ -813,8 +813,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.6315959095954895,
-        "latency_ms": 6783.2,
-        "wall_latency_ms": 6785.9
+        "latency_ms": 4864.0,
+        "wall_latency_ms": 4867.0
       },
       {
         "question": "What problem related to end-to-end steering prediction for autonomous vehicles has become a major area of research motivates this paper, and what solution does it propose?",
@@ -829,8 +829,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.865169882774353,
-        "latency_ms": 5918.6,
-        "wall_latency_ms": 5920.6
+        "latency_ms": 4586.2,
+        "wall_latency_ms": 4588.2
       },
       {
         "question": "What problem related to Pre-trained language models have been recently shown to beneﬁt task-oriented dialogue (TOD) systems motivates this paper, and what solution does it propose?",
@@ -844,8 +844,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6726757884025574,
-        "latency_ms": 6133.0,
-        "wall_latency_ms": 6135.0
+        "latency_ms": 4593.9,
+        "wall_latency_ms": 4596.6
       },
       {
         "question": "What method does this paper introduce for Retrieval-Augmented Generation (RAG) is a promising approach for mitigating the hallucination of large language, and what is it used for?",
@@ -862,8 +862,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6043576598167419,
-        "latency_ms": 5860.0,
-        "wall_latency_ms": 5863.1
+        "latency_ms": 4872.5,
+        "wall_latency_ms": 4875.5
       },
       {
         "question": "What is the main contribution of this paper regarding Generalist foundation models such as GPT-4 have displayed surprising capabilities in a wide variety?",
@@ -878,8 +878,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.4673616886138916,
-        "latency_ms": 6349.8,
-        "wall_latency_ms": 6351.8
+        "latency_ms": 4707.8,
+        "wall_latency_ms": 4709.8
       },
       {
         "question": "What problem related to We study the problem of retrieval with instructions, where users of a retrieval system motivates this paper, and what solution does it propose?",
@@ -893,8 +893,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.6032289266586304,
-        "latency_ms": 4969.1,
-        "wall_latency_ms": 4971.2
+        "latency_ms": 4162.7,
+        "wall_latency_ms": 4164.7
       },
       {
         "question": "What technique is introduced to improve a two-level attention schema?",
@@ -907,8 +907,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 1.0,
         "answer_relevance": 0.7924169898033142,
-        "latency_ms": 6868.6,
-        "wall_latency_ms": 6871.1
+        "latency_ms": 4733.2,
+        "wall_latency_ms": 4736.2
       },
       {
         "question": "What method does this paper introduce for Generative AI models have shown impressive performance on many Natural Language Processing tasks such, and what is it used for?",
@@ -924,8 +924,8 @@
         "ndcg@5": 1.0,
         "faithfulness": 0.0,
         "answer_relevance": 0.593285083770752,
-        "latency_ms": 9798.1,
-        "wall_latency_ms": 9800.1
+        "latency_ms": 7863.2,
+        "wall_latency_ms": 7865.2
       }
     ]
   }

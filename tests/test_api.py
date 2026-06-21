@@ -10,16 +10,17 @@ import httpx
 import pytest
 
 BASE = 'http://localhost:8000'
+TIMEOUT = 30.0  # rerank/NLI-loaded server can take a few seconds under load
 
 
 def test_root():
-    r = httpx.get(f'{BASE}/')
+    r = httpx.get(f'{BASE}/', timeout=TIMEOUT)
     assert r.status_code == 200
     assert r.json()['service'] == 'CSAI415 Paper RAG'
 
 
 def test_health():
-    r = httpx.get(f'{BASE}/health')
+    r = httpx.get(f'{BASE}/health', timeout=TIMEOUT)
     assert r.status_code == 200
     body = r.json()
     assert body['status'] == 'ok'
@@ -27,7 +28,7 @@ def test_health():
 
 
 def test_stats():
-    r = httpx.get(f'{BASE}/stats')
+    r = httpx.get(f'{BASE}/stats', timeout=TIMEOUT)
     assert r.status_code == 200
     body = r.json()
     assert body['papers'] > 0
@@ -36,7 +37,7 @@ def test_stats():
 
 
 def test_search_hybrid_default():
-    r = httpx.get(f'{BASE}/search', params={'q': 'retrieval augmented generation'})
+    r = httpx.get(f'{BASE}/search', params={'q': 'retrieval augmented generation'}, timeout=TIMEOUT)
     assert r.status_code == 200
     body = r.json()
     assert body['mode'] == 'hybrid'
@@ -47,7 +48,7 @@ def test_search_hybrid_default():
 
 def test_search_all_modes():
     for mode in ['dense', 'sparse', 'hybrid']:
-        r = httpx.get(f'{BASE}/search', params={'q': 'vector database', 'mode': mode, 'top_k': 5})
+        r = httpx.get(f'{BASE}/search', params={'q': 'vector database', 'mode': mode, 'top_k': 5}, timeout=TIMEOUT)
         assert r.status_code == 200, f'mode={mode} failed'
         body = r.json()
         assert body['mode'] == mode
@@ -55,7 +56,7 @@ def test_search_all_modes():
 
 
 def test_search_results_have_resolvable_chunk_id_and_page():
-    r = httpx.get(f'{BASE}/search', params={'q': 'retrieval augmented generation', 'top_k': 5})
+    r = httpx.get(f'{BASE}/search', params={'q': 'retrieval augmented generation', 'top_k': 5}, timeout=TIMEOUT)
     assert r.status_code == 200
     results = r.json()['results']
     assert len(results) > 0
@@ -65,17 +66,17 @@ def test_search_results_have_resolvable_chunk_id_and_page():
 
 
 def test_search_validates_top_k():
-    r = httpx.get(f'{BASE}/search', params={'q': 'test', 'top_k': 999})
+    r = httpx.get(f'{BASE}/search', params={'q': 'test', 'top_k': 999}, timeout=TIMEOUT)
     assert r.status_code == 422  # validation error
 
 
 def test_search_validates_empty_query():
-    r = httpx.get(f'{BASE}/search', params={'q': ''})
+    r = httpx.get(f'{BASE}/search', params={'q': ''}, timeout=TIMEOUT)
     assert r.status_code == 422
 
 
 def test_documents_pagination():
-    r = httpx.get(f'{BASE}/documents', params={'skip': 0, 'limit': 5})
+    r = httpx.get(f'{BASE}/documents', params={'skip': 0, 'limit': 5}, timeout=TIMEOUT)
     assert r.status_code == 200
     body = r.json()
     assert body['total'] > 0
@@ -83,7 +84,7 @@ def test_documents_pagination():
 
 
 def test_document_not_found():
-    r = httpx.get(f'{BASE}/document/nonexistent_id_xxx')
+    r = httpx.get(f'{BASE}/document/nonexistent_id_xxx', timeout=TIMEOUT)
     assert r.status_code == 404
 
 
@@ -92,12 +93,12 @@ def test_feedback_stored():
         'query': 'test query',
         'doc_id': 'test_doc',
         'relevant': True
-    })
+    }, timeout=TIMEOUT)
     assert r.status_code == 200
     assert r.json()['stored'] is True
 
 
 def test_graph_topics():
-    r = httpx.get(f'{BASE}/graph/topics')
+    r = httpx.get(f'{BASE}/graph/topics', timeout=TIMEOUT)
     # 200 if Neo4j connected, 503 if not — both acceptable
     assert r.status_code in (200, 503)
