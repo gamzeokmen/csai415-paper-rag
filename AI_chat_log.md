@@ -40,9 +40,16 @@ Key debugging sessions included: Docker volume/database name mismatches, qdrant-
 
 This was a Claude Code (CLI) session, not a claude.ai web chat, so no shareable
 link exists for it — Claude Code sessions run against a local repository
-checkout and don't generate a `claude.ai/share/...` URL. The summary below
-covers the actual work done, in the same spirit as the "Summary of AI usage"
-section, since a transcript link isn't available for this surface.
+checkout and don't generate a `claude.ai/share/...` URL. Instead, the full
+session transcript is included directly in this repo:
+
+**Full transcript:** [`D3_chat_log.md`](D3_chat_log.md) — a cleaned, readable
+export of the complete local session log (74 exchanges). Typos and informal
+phrasing in the human turns were corrected for readability; no requests,
+decisions, or technical content were altered. One credential leaked mid-session
+during a debugging exchange (a Neo4j Aura database password) has been redacted.
+
+The summary below covers the same scope, condensed.
 
 **Scope:** built D3 (GraphRAG executor, evaluation harness, safety mitigations,
 ablation, hygiene, report) on top of the graded D2 system, end to end, plus a
