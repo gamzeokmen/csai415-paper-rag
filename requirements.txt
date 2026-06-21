@@ -28,3 +28,17 @@ arxiv>=2.1
 
 # tests
 pytest>=8.0
+pytest-anyio
+anyio
+
+# D3 — GraphRAG, evaluation, safety
+transformers>=4.40        # already a sentence-transformers dependency; pinned explicitly since
+                           # app/graphrag.py's Generator interface (D3 brief) will load Qwen2.5 directly
+accelerate>=0.30          # multi-device model loading for the D3 generator
+bitsandbytes>=0.43         # 4-bit quantization for the D3 generator — installs and imports fine on
+                           # Windows/CPU, but 4-bit loading itself needs CUDA, which this dev machine
+                           # doesn't have; see app/graphrag.py module docstring
+# ragas is intentionally NOT pinned yet — the brief lists it as an optional
+# cross-check against the local NLI/embedding proxy (see app/safety.py,
+# scripts/evaluate_d3.py docstrings), deferred until the real generator is
+# wired up since a 1.5B-judge RAGAS run isn't meaningful before then

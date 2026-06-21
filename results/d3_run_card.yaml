@@ -1,0 +1,115 @@
+timestamp: '2026-06-20T23:30:08.044659+00:00'
+d3_complete: true
+models:
+  embedder: BAAI/bge-small-en-v1.5
+  reranker: BAAI/bge-reranker-base
+  nli: cross-encoder/nli-deberta-v3-small
+  generator: "stub (extractive) \u2014 see app/graphrag.py; not yet the Qwen2.5-1.5B-Instruct\
+    \ brief decision"
+seeds:
+  gold_qa_sample_seed: 415
+dataset_sizes:
+  corpus_papers: 144
+  corpus_chunks: 6858
+  gold_qa_items: 18
+  gold_qa_top_k: 5
+eval_summary:
+  vector_only:
+    recall@5: 1.0
+    mrr: 1.0
+    ndcg@5: 1.0
+    faithfulness: 0.3333333333333333
+    answer_relevance: 0.6290721131695641
+    p50_ms: 4504.1
+    p95_ms: 5340.44
+    mean_ms: 4606.316666666667
+  graph_guided:
+    recall@5: 0.05555555555555555
+    mrr: 0.05555555555555555
+    ndcg@5: 0.05555555555555555
+    faithfulness: 0.3888888888888889
+    answer_relevance: 0.609935869773229
+    p50_ms: 5151.700000000001
+    p95_ms: 7418.819999999997
+    mean_ms: 5386.7555555555555
+  hybrid:
+    recall@5: 1.0
+    mrr: 1.0
+    ndcg@5: 1.0
+    faithfulness: 0.3333333333333333
+    answer_relevance: 0.6290721131695641
+    p50_ms: 4772.5
+    p95_ms: 6183.939999999998
+    mean_ms: 4911.233333333334
+ablation_summary:
+  vector_only:
+    recall@5: 1.0
+    mrr: 1.0
+    ndcg@5: 1.0
+    faithfulness: 0.3333333333333333
+    answer_relevance: 0.6290721131695641
+    p50_ms: 4333.75
+    p95_ms: 5083.754999999999
+    mean_ms: 4368.016666666666
+  graph_guided:
+    recall@5: 0.05555555555555555
+    mrr: 0.05555555555555555
+    ndcg@5: 0.05555555555555555
+    faithfulness: 0.3888888888888889
+    answer_relevance: 0.609935869773229
+    p50_ms: 4982.05
+    p95_ms: 7377.429999999997
+    mean_ms: 5439.38888888889
+  hybrid_no_rerank:
+    recall@5: 0.4444444444444444
+    mrr: 0.18240740740740743
+    ndcg@5: 0.24713661771552178
+    faithfulness: 0.3333333333333333
+    answer_relevance: 0.584118558300866
+    p50_ms: 1491.9499999999998
+    p95_ms: 2410.7499999999973
+    mean_ms: 1613.4333333333334
+  hybrid:
+    recall@5: 1.0
+    mrr: 1.0
+    ndcg@5: 1.0
+    faithfulness: 0.3333333333333333
+    answer_relevance: 0.6290721131695641
+    p50_ms: 4753.299999999999
+    p95_ms: 5976.874999999996
+    mean_ms: 4757.122222222221
+ablation_interpretation: "On this 18-item gold set, vector_only and hybrid both reach\
+  \ Recall@5=1.00, while graph_guided alone reaches only 0.06 \u2014 this is expected,\
+  \ not a defect: select_subgraph deliberately returns graph *neighbors* of the vector-seeded\
+  \ papers, never the seeds themselves, so when (as here) the correct answer is the\
+  \ directly-matching paper, only modes that include the vector seed can find it.\
+  \ Reranking lifts Recall@5 from 0.44 (hybrid, no rerank) to 1.00 (hybrid+rerank)\
+  \ at a latency cost of 3566ms p95 \u2014 consistent with D2's own finding that the\
+  \ cross-encoder rerank is the single biggest quality lever in the pipeline; faithfulness\
+  \ stays flat (0.33 -> 0.33) because it's measured against whichever single excerpt\
+  \ the extractive stub picks, which reranking doesn't materially change here even\
+  \ when it changes *which paper* that excerpt comes from. Honest limitation: graph_guided's\
+  \ weakness here is partly an artifact of this corpus's graph signal being thin \u2014\
+  \ CITES is 300 synthetic edges (co-author-or-same-venue heuristic, not real citations;\
+  \ the 144 papers don't actually cite each other) and Topic coverage is dominated\
+  \ by a single arXiv category (cs.IR, 96% of papers) \u2014 so graph expansion has\
+  \ less genuine relational signal to work with than a citation-rich corpus would\
+  \ provide."
+ablation_limitations:
+- "CITES is 300 synthetic edges (co-author-or-same-venue + 1-year-window heuristic),\
+  \ not real citations \u2014 the 144 papers in this corpus do not actually cite each\
+  \ other."
+- Topic nodes are just the 5 arXiv categories and cs.IR alone covers 138/144 papers
+  (96%), so shared-topic alone is a weak/non-discriminating graph signal at this corpus
+  size.
+- "Faithfulness/relevance reflect the extractive answer() stand-in, not the brief's\
+  \ Qwen2.5-1.5B-Instruct generator (not yet wired up \u2014 needs CUDA torch + bitsandbytes)."
+- graph_guided structurally excludes vector-seeded papers from its results (returns
+  neighbors, not seeds), so it is expected to underperform on gold questions whose
+  answer is the directly-matching paper rather than a related one.
+safety_demo:
+  scenario: 'A retrieved chunk contains an embedded prompt-injection payload, ranked
+    #1.'
+  before_hijacked: true
+  after_hijacked: false
+  after_cites_poisoned_chunk: false

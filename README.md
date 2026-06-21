@@ -1,6 +1,6 @@
-# CSAI415 — Paper RAG (Deliverable 2)
+# CSAI415 — Paper RAG (Deliverable 3)
 
-Hybrid retrieval-augmented generation system over 144 arXiv papers on RAG/retrieval research. Production stack: MongoDB + Qdrant + Neo4j + FastAPI, all orchestrated with Docker Compose.
+Hybrid retrieval-augmented generation system over 144 arXiv papers on RAG/retrieval research. Production stack: MongoDB + Qdrant + Neo4j + FastAPI, all orchestrated with Docker Compose. D3 adds a GraphRAG executor (multi-hop subgraph selection → chunk expansion → blend → answer), an evaluation harness (faithfulness/relevance/IR metrics/latency against a gold Q/A set), two safety mitigations, and a vector-only vs graph-guided vs hybrid ablation.
 
 ## Stack
 
@@ -14,6 +14,8 @@ Hybrid retrieval-augmented generation system over 144 arXiv papers on RAG/retrie
 | Sparse | BM25Okapi over 6,858 chunks |
 | Fusion | Reciprocal Rank Fusion, k=60 |
 | API | FastAPI 2.0.0 (motor + AsyncQdrantClient + AsyncGraphDatabase) |
+| NLI proxy (D3) | cross-encoder/nli-deberta-v3-small — faithfulness + provenance filtering |
+| Generator (D3) | extractive stand-in for now; Qwen2.5-1.5B-Instruct (4-bit) planned — see Limitations |
 
 ## Architecture — dataflow (ingest → stores → retrieval → graph)
 
@@ -28,6 +30,12 @@ flowchart LR
     Qdrant -->|"dense cosine"| API
     API -->|"RRF fusion + cross-encoder rerank"| Out["ranked chunks + citations"]
     Neo4j -->|"Cypher"| G["/graph/* endpoints"]
+    Q2(["user query"]) --> Ask{{"FastAPI /ask"}}
+    Ask -->|"1. select_subgraph"| Neo4j
+    Ask -->|"2. expand_to_chunks"| Qdrant
+    Ask -->|"2. expand_to_chunks"| Mongo
+    Ask -->|"3. blend (RRF + rerank)"| Safety["app/safety.py<br/>injection filter + provenance filter"]
+    Safety -->|"4. answer"| Out2["answer + citations (w/ pages) + steps[]"]
 ```
 
 ## Team
@@ -38,7 +46,7 @@ flowchart LR
 | Kenan Almukhllati | 22000675 | Neo4j graph build, Cypher queries, graph testing |
 | Alfarouq Alsharif | 22000440 | Docker setup, healthchecks, smoke tests |
 
-## Headline results (30-query gold set)
+## D2 headline results (30-query gold set)
 
 | Mode | R@5 | R@10 | MRR | nDCG@5 | P@5 | p95 ms |
 |---|---|---|---|---|---|---|
@@ -47,7 +55,18 @@ flowchart LR
 | Hybrid (RRF) | 0.767 | 0.900 | 0.596 | 0.618 | 0.153 | 77.3 |
 | **Hybrid + Rerank** | **1.000** | **1.000** | **1.000** | **1.000** | **0.200** | **670.6** |
 
-Tests: **11/11 pytest passing** in 7.6 s.
+## D3 headline results (18-item gold Q/A set, `python scripts/run_d3.py`)
+
+| Arm | R@5 | Faithfulness | Relevance | p95 ms |
+|---|---|---|---|---|
+| vector_only | 1.000 | 0.333 | 0.629 | 5340 |
+| graph_guided | 0.056 | 0.389 | 0.610 | 7419 |
+| hybrid_no_rerank | 0.444 | 0.333 | 0.584 | 2411 |
+| **hybrid (+rerank)** | **1.000** | **0.333** | **0.629** | **6184** |
+
+`graph_guided`'s low R@5 is expected, not a defect — `select_subgraph` returns graph *neighbors*, never the vector-seeded papers themselves (see Limitations). Reranking lifts R@5 from 0.444 → 1.000. Faithfulness/relevance are proxy metrics against the current extractive `answer()` stand-in, not the brief's planned LLM generator — see Limitations. Full numbers, interpretation, and safety demo evidence: `results/d3_run_card.yaml`.
+
+Tests: **23/23 pytest passing**, ~3 min (D2's 12 + D3's `test_ask`/`test_graphrag`/`test_safety`).
 
 ## Quick start
 
@@ -78,6 +97,25 @@ uvicorn app.main:app --reload --port 8000
 
 # 6. tests
 pytest tests/ -v
+```
+
+## D3 quick start
+
+Requires the API running (step 5 above) and `eval/gold_qa.json` (already committed; regenerate with `python scripts/build_gold_qa.py` if needed).
+
+```bash
+# one command: re-runs eval, ablation, safety, full test suite, and writes
+# results/d3_run_card.yaml — every D3 number traces to this, nothing hand-edited
+python scripts/run_d3.py
+```
+
+Or run each stage individually:
+
+```bash
+python scripts/build_gold_qa.py     # eval/gold_qa.json — 18-item gold Q/A set (draft, human-reviewed)
+python scripts/evaluate_d3.py       # results/d3_eval.json, d3_eval.png
+python scripts/ablation_d3.py       # results/d3_ablation.json, d3_ablation.png
+pytest tests/test_safety.py -v      # results/d3_safety_before_after.json
 ```
 
 ## Dataset & reproducibility
@@ -115,7 +153,11 @@ GET  /graph/cites             most-cited papers (Cypher Query 6)
 ```
 csai415-paper-rag/
 ├── app/
-│   └── main.py                  FastAPI app — async stack, 10 endpoints
+│   ├── main.py                  FastAPI app — async stack, 13 endpoints (incl. POST /ask)
+│   ├── retrieval.py             D3 — shared dense/sparse/RRF/rerank primitives (extracted from
+│   │                            main.py so graphrag.py can reuse them without a circular import)
+│   ├── graphrag.py              D3 — GraphRAGExecutor: select_subgraph, expand_to_chunks, blend, answer
+│   └── safety.py                D3 — prompt-injection defense + provenance filtering
 ├── notebooks/
 │   ├── 01_ingest_corpus.ipynb          D1 — download 10 arXiv papers
 │   ├── 02_build_index.ipynb            D1 — build embeddings + BM25 index
@@ -128,31 +170,37 @@ csai415-paper-rag/
 │   ├── 07_enhancements.ipynb           D2 — CITES edge extraction
 │   ├── 08_final_polish.ipynb           D2 — latency breakdown, per-query analysis
 │   └── 09_final_fix.ipynb             D2 — corrected gold set, synthetic CITES, final metrics
+├── eval/
+│   └── gold_qa.json              D3 — 18-item gold Q/A set, arXiv-id-standardized (draft, human-reviewed)
 ├── data/
 │   ├── papers/                  144 PDF files
 │   ├── gold_set.json            D1 gold set (10 queries)
-│   ├── gold_set_d2.json         D2 gold set (30 queries, arXiv IDs)
+│   ├── gold_set_d2.json         D2 gold set (30 queries) — Mongo ObjectId, NOT arXiv id; see Limitations
 │   ├── corpus_manifest.csv      full 144-paper manifest (id, title, authors, year, urls)
 │   └── corpus_metadata.json
 ├── results/
-│   ├── d2_metrics_comparison.png
-│   ├── d2_latency_comparison.png
-│   ├── d2_latency_breakdown.png
-│   ├── d2_graph_nodes.png
-│   ├── d2_per_query_metrics.json
-│   ├── d2_citation_examples.json
-│   ├── d2_graph_stats.json
-│   ├── d2_final_run_card.yaml
-│   └── d2_ingest_run_card.yaml
+│   ├── d2_*                     D2 metrics, latency, graph stats, run cards
+│   ├── d3_eval.json / .png      D3 — faithfulness, relevance, IR metrics, p50/p95 per mode
+│   ├── d3_ablation.json / .png  D3 — vector_only vs graph_guided vs hybrid(+rerank), interpreted
+│   ├── d3_safety_before_after.json   D3 — prompt-injection demo evidence
+│   └── d3_run_card.yaml         D3 — model ids, seeds, dataset sizes, headline metrics
 ├── scripts/
 │   ├── build_manifest.py        regenerate data/corpus_manifest.csv from arXiv
-│   └── download_corpus.py       fetch any missing PDFs from the manifest
+│   ├── download_corpus.py       fetch any missing PDFs from the manifest
+│   ├── repair_metadata.py       D3 — fix mistitled documents from the manifest
+│   ├── build_gold_qa.py         D3 — draft the gold Q/A set (arXiv-id-standardized)
+│   ├── evaluate_d3.py           D3 — faithfulness/relevance/IR-metrics/latency evaluator
+│   ├── ablation_d3.py           D3 — vector_only vs graph_guided vs hybrid(+rerank) ablation
+│   └── run_d3.py                D3 — one-command runner (eval + ablation + safety + tests + run card)
 ├── tests/
-│   └── test_api.py              11 smoke tests
+│   ├── test_api.py              D1/D2 — 12 smoke tests
+│   ├── test_ask.py              D3 — POST /ask
+│   ├── test_graphrag.py         D3 — GraphRAGExecutor end-to-end
+│   └── test_safety.py           D3 — injection defense + provenance filtering (+ live demo)
 ├── docker-compose.yml
 ├── requirements.txt
 ├── AI_chat_log.md
-└── .env                         (gitignored) — NEO4J credentials
+└── .env                         (gitignored) — Mongo/Qdrant/NEO4J credentials
 ```
 
 ## Design decisions
@@ -169,12 +217,25 @@ csai415-paper-rag/
 
 **Query embedding cache** — lru_cache(maxsize=512) avoids redundant transformer forward passes on repeated queries.
 
+**D3 — chunk_id over chunk_idx** — `app/main.py` originally keyed retrieval on a `chunk_idx` field that doesn't exist in the real Mongo/Qdrant schema (`chunk_id`/`page_num`/`chunk_seq`), so every dense hit and rerank lookup silently fell back to enumeration index 0. Fixed so citations carry real page numbers — a precondition for D3's "citations with page ranges" requirement.
+
+**D3 — capped shared-topic graph expansion** — `cs.IR` alone covers 138/144 papers (96%) of this corpus, so `select_subgraph` (app/graphrag.py) treats CITES + shared-author as the primary expansion signals and caps shared-topic's contribution per seed; otherwise "graph-guided" retrieval would be statistically indistinguishable from "the whole corpus."
+
+**D3 — extractive answer() stand-in** — the brief's Generator decision (Qwen2.5-1.5B-Instruct, 4-bit) needs CUDA torch + bitsandbytes; this dev machine's torch build is CPU-only. `answer()` returns real, page-numbered citations now, with LLM-generated prose as a separate follow-up once GPU is available.
+
+**D3 — safety mitigations wired into the live pipeline, not just tested** — `app/safety.py`'s prompt-injection filter and provenance filter both run inside `GraphRAGExecutor.answer()` on every request, not only in isolated tests. See `results/d3_safety_before_after.json` for concrete evidence.
+
 ## Honest limitations
 
-- **Real CITES edges yielded 0** — the 144 papers don't cite each other. Notebook 09 adds 300 synthetic CITES edges (co-author OR same-venue + 1-year window), clearly labelled `synthetic: true`.
+- **Real CITES edges yielded 0** — the 144 papers don't cite each other. Notebook 09 adds 300 synthetic CITES edges (co-author OR same-venue + 1-year window), clearly labelled `synthetic: true`. This means D3's graph-guided ablation arm is measuring a heuristic relational signal, not genuine citation structure.
+- **Topic graph is coarse** — only 5 Topic nodes (arXiv categories), 96% of papers share one (`cs.IR`) — shared-topic alone is a weak, non-discriminating signal at this corpus size (capped accordingly — see Design decisions).
+- **Corpus contains off-topic papers** — building the D3 gold set surfaced 7 papers in the 144-paper corpus with no connection to RAG/retrieval (particle physics, pure math, geophysics): `2110.06104`, `2403.14230`, `2103.00020`, `2303.11040`, `2405.09890`, `2104.08773`, `2204.07705`. Excluded from the gold set; still in the live corpus and may be quietly affecting D1/D2 metrics too — worth pruning from `corpus_manifest.csv`.
+- **D3 gold set is a draft** — `eval/gold_qa.json`'s 18 items have a `reviewed: false` flag; questions are template-drafted from real abstract text (not fabricated), but a few carry PDF-extraction artifacts (ligatures, stray punctuation) that a human pass should clean up.
+- **graph_guided mode structurally excludes the vector seed** — `select_subgraph` returns graph *neighbors*, never the seed papers themselves, so it underperforms on gold questions whose answer is the directly-matching paper rather than a related one (see `results/d3_ablation.json`'s interpretation).
+- **Faithfulness/relevance are proxies on a stub generator** — `cross-encoder/nli-deberta-v3-small` (entailment) and bge-small cosine similarity stand in for RAGAS, against an extractive (not LLM-generated) answer. Numbers validate the pipeline, not real generation quality yet.
 - **Gold set built from indexed chunks** — guarantees retrievability but doesn't test out-of-distribution queries.
-- **No live user feedback yet** — the /feedback endpoint stores signals but doesn't update retrieval. D3 will wire River + ADWIN to this stream.
+- **No live user feedback yet** — the /feedback endpoint stores signals but doesn't update retrieval. D4 will wire River + ADWIN to this stream.
 
 ## Submission
 
-This deliverable accompanies `D2_Report.pdf` and `AI_chat_log.md`.
+D2 accompanies `D2_Report.pdf`. D3 accompanies `D3_Report.md` and the updated `AI_chat_log.md`.
