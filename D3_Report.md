@@ -19,7 +19,7 @@ This report covers Deliverable 3, built on top of the graded D1/D2 system withou
 
 **A precondition fix.** `app/main.py` originally keyed all retrieval on a `chunk_idx` field that doesn't exist in the real Mongo/Qdrant schema (`chunk_id`/`page_num`/`chunk_seq`) — every dense hit silently fell back to enumeration index 0. Without fixing this first, "citations with page ranges" would have been structurally impossible. Fixed (and the fix extracted into `app/retrieval.py` so `app/graphrag.py` could reuse the same search primitives without a circular import).
 
-**Generator status.** The brief's Generator decision (Qwen2.5-1.5B-Instruct, 4-bit via bitsandbytes) is not wired up. This development machine's `torch` build has no CUDA support — `accelerate` and `bitsandbytes` both install and import cleanly here (verified), but 4-bit loading itself requires a GPU this machine doesn't have. `answer()` currently returns a deterministic extractive stand-in (the top retrieved chunk's text, post-safety-filtering) rather than LLM-generated prose. This was a deliberate scoping decision (see `app/graphrag.py`'s module docstring) made explicitly so the retrieval, citation, and safety mechanics could be built and tested end-to-end now, independent of the GPU setup task. Wiring in the real generator is the natural D4 starting point.
+**Generator status.** The brief's Generator decision named Qwen2.5-1.5B-Instruct, 4-bit via bitsandbytes, on GPU. This development machine has no CUDA support, so that exact path isn't available — `accelerate` and `bitsandbytes` both install and import cleanly here (verified), but 4-bit loading itself needs a GPU. The brief's own `Generator` interface explicitly named `ollama` as an allowed backend alongside `hf`/`api`, so `app/generator.py`'s `OllamaGenerator` runs the *same model id* (`qwen2.5:1.5b`) via a local Ollama server, CPU-quantized (GGUF) instead of bitsandbytes-4-bit. This is not a stand-in — it's a real LLM producing real generated prose, just on a different (CPU) execution path than originally planned. If Ollama is unreachable, `answer()` falls back to a deterministic extractive excerpt rather than crashing (same graceful-degrade pattern as the Neo4j-down handling elsewhere in the executor); the `generator` field on every `/ask` response and in `results/d3_run_card.yaml`'s `generators_observed` confirms which path actually produced a given answer.
 
 ---
 
@@ -38,34 +38,36 @@ Building the gold set also surfaced a **corpus-quality finding**: random samplin
 ### 2.2 Metrics
 
 - **IR metrics** — Recall@5, MRR, nDCG@5, following the exact convention established in D2's `09_final_fix.ipynb` (gold `doc_id` must appear in the ranked retrieved `doc_id`s).
-- **Faithfulness (RAGAS-equivalent proxy)** — fraction of answer sentences entailed by the retrieved context, via `cross-encoder/nli-deberta-v3-small`. The entailment label index was verified empirically against known entailing/contradicting/neutral sentence pairs before being trusted in the real metric (index 1 = entailment).
+- **Faithfulness (RAGAS-equivalent proxy)** — `app/safety.py`'s `filter_ungrounded()` `grounded_fraction`: a sentence is kept if it's both *not* NLI-contradicted by and *semantically similar to* at least one retrieved context chunk. This is **not** a strict entailment-only check. An entailment-only version was tried first and found empirically to score near-zero for nearly any real, paraphrased LLM sentence even when clearly grounded (e.g. a well-formed answer paraphrase scored 0.001 entailment probability against its source context, while an irrelevant fabricated claim scored equally near-zero — entailment alone couldn't tell them apart). NLI cross-encoders are trained on verbatim logical entailment (SNLI/MNLI-style sentence pairs), not paraphrase/synthesis recognition. Switching to a contradiction-probability check (catches outright-false claims) combined with embedding cosine similarity (catches irrelevant-but-not-contradicted fabrications) fixed this — verified on the same test cases (grounded paraphrase: 0.001 max-contradiction / 0.817 max-similarity → kept; irrelevant claim: 0.344 similarity → dropped; outright-false claim: 1.0 max-contradiction → dropped).
 - **Answer-relevance (proxy)** — cosine similarity between the answer and question embeddings, via `bge-small` (the same embedder used for retrieval).
-- **Latency** — p50/p95, measured from `/ask`'s own reported `latency_ms` over all 18 gold questions per arm.
+- **Latency** — p50/p95, measured from `/ask`'s own reported `latency_ms` over all 18 gold questions per arm. Now dominated by real LLM generation time (Ollama, CPU), not just retrieval+rerank.
 
-**Why these are proxies, not final numbers.** Faithfulness and relevance are measured against the extractive `answer()` stand-in (§1), not real LLM-generated prose. They validate that the entailment/embedding-proxy *pipeline* works end-to-end — they are not yet a measurement of generation quality. Re-running `scripts/evaluate_d3.py` once the real generator is wired in is the correct next step before treating these as final D3 headline numbers. A real RAGAS cross-check (using the wired-in generator as judge) was scoped as optional in the brief and deferred for the same reason — a 1.5B-parameter judge model is known to be noisy, and there's no generator to judge yet.
+**Why these are proxies, not final numbers.** Faithfulness and relevance are NLI/embedding-based stand-ins for RAGAS, now measured against real LLM-generated answers (§1) rather than an extractive stub — a meaningful improvement over an earlier pass of this evaluation, but still a proxy. A real RAGAS cross-check (using the live generator as judge) remains optional per the brief and is deferred — a 1.5B-parameter judge model is known to be noisy at this scale.
 
 ---
 
 ## 3. Results
 
-### 3.1 Evaluation (`results/d3_eval.json`)
+### 3.1 Evaluation (`results/d3_eval.json`) — real generator (Ollama, qwen2.5:1.5b)
 
 | Mode | R@5 | MRR | nDCG@5 | Faithfulness | Relevance | p95 ms |
 |---|---|---|---|---|---|---|
-| vector_only | 1.000 | 1.000 | 1.000 | 0.333 | 0.629 | 5340 |
-| graph_guided | 0.056 | 0.056 | 0.056 | 0.389 | 0.610 | 7419 |
-| hybrid | 1.000 | 1.000 | 1.000 | 0.333 | 0.629 | 6184 |
+| vector_only | 1.000 | 1.000 | 1.000 | 0.944 | 0.804 | 19652 |
+| graph_guided | 0.056 | 0.056 | 0.056 | 0.889 | 0.759 | 25368 |
+| hybrid | 1.000 | 1.000 | 1.000 | 0.944 | 0.812 | 22857 |
 
 ### 3.2 Ablation (`results/d3_ablation.json`) — vector-only vs graph-guided vs hybrid(+rerank)
 
 | Arm | R@5 | Faithfulness | Relevance | p95 ms |
 |---|---|---|---|---|
-| vector_only | 1.000 | 0.333 | 0.629 | 5084 |
-| graph_guided | 0.056 | 0.389 | 0.610 | 7377 |
-| hybrid_no_rerank | 0.444 | 0.333 | 0.584 | 2411 |
-| **hybrid (+rerank)** | **1.000** | **0.333** | **0.629** | **5977** |
+| vector_only | 1.000 | 0.889 | 0.791 | 39367 |
+| graph_guided | 0.056 | 0.944 | 0.762 | 41524 |
+| hybrid_no_rerank | 0.444 | 0.889 | 0.772 | 25907 |
+| **hybrid (+rerank)** | **1.000** | **0.889** | **0.800** | **40254** |
 
-**Interpretation.** `vector_only` and `hybrid` both reach Recall@5 = 1.00, while `graph_guided` alone reaches only 0.06 — this is **expected, not a defect**: `select_subgraph` deliberately returns graph *neighbors* of the vector-seeded papers, never the seeds themselves, so when (as in this gold set, by construction) the correct answer is the directly-matching paper, only modes that include the vector seed can find it. Reranking lifts Recall@5 from 0.444 to 1.000 at a latency cost of roughly +3.0–3.6s p95 — consistent with D2's own finding that the cross-encoder rerank is the single biggest quality lever in the pipeline. Faithfulness stays essentially flat across the rerank toggle (0.33 either way), because it's measured against whichever single excerpt the extractive stub happens to pick, which reranking doesn't materially change even when it changes *which paper* that excerpt comes from.
+**Interpretation.** `vector_only` and `hybrid` both reach Recall@5 = 1.00, while `graph_guided` alone reaches only 0.06 — this is **expected, not a defect**: `select_subgraph` deliberately returns graph *neighbors* of the vector-seeded papers, never the seeds themselves, so when (as in this gold set, by construction) the correct answer is the directly-matching paper, only modes that include the vector seed can find it. Reranking lifts Recall@5 from 0.444 to 1.000, at a real latency cost — p95 latency is now dominated by LLM generation time (Ollama, CPU) rather than retrieval+rerank alone, so the "rerank cost" is harder to isolate cleanly than in D2's retrieval-only benchmark. Faithfulness stays essentially flat across the rerank toggle (0.889 either way) because reranking changes *which paper/chunk* becomes context for the generator, not how thoroughly the resulting answer gets verified against it.
+
+Faithfulness numbers here (0.89–0.94) are real generation quality, not a stub-extraction artifact — confirmed by re-running the full evaluation before and after the generator was wired in: faithfulness rose from ~0.33 (extractive stub, original entailment-only filter) to ~0.89–0.94 (real LLM, corrected contradiction+similarity filter). Both factors — the better generator and the corrected metric — contributed; see §2.2 for why the metric itself needed fixing.
 
 **Honest limitation.** `graph_guided`'s weakness here is partly an artifact of this corpus's graph signal being thin, not solely the executor's design: CITES is 300 *synthetic* edges (co-author-or-same-venue heuristic — the 144 papers do not actually cite each other, confirmed in D2), and Topic coverage is dominated by a single arXiv category (`cs.IR`, 96% of papers). A citation-rich corpus would give graph expansion meaningfully more genuine relational signal to work with; this corpus's graph is a heuristic approximation by necessity.
 
@@ -81,7 +83,7 @@ Two mitigations, both wired into the live pipeline (`GraphRAGExecutor.answer()`)
 
 **1. Prompt-injection / retrieval-poisoning defense.** `app/safety.py`'s `detect_injection()` flags instruction-like text in retrieved chunks (e.g. "ignore all previous instructions," "you are now in developer mode," embedded `system:` prompts) via pattern matching. Any flagged chunk is excluded entirely — it can never become a citation or part of the answer — and the executor backfills from the next-best candidate (`run()` requests a wider candidate pool than `top_k` specifically so backfill candidates exist).
 
-**2. Provenance filtering / source pinning.** `filter_ungrounded()` reuses the same NLI-entailment proxy as faithfulness scoring to drop any answer sentence not entailed by the cited context, rather than trusting the extracted text by default. An early draft of this fell back to the *unfiltered* raw excerpt whenever nothing survived the filter — which would have silently defeated the entire mitigation. Caught and fixed before commit: when nothing survives, `answer()` now returns an explicit "could not verify as grounded" message instead.
+**2. Provenance filtering / source pinning.** `filter_ungrounded()` (also used directly as the faithfulness metric, §2.2) drops any answer sentence that's either NLI-contradicted by or semantically unrelated to every retrieved context chunk, rather than trusting generated text by default. Two real bugs were caught and fixed while building this: (a) an early draft fell back to the *unfiltered* raw excerpt whenever nothing survived the filter — which would have silently defeated the entire mitigation; fixed so it returns an explicit "could not verify as grounded" message instead; (b) the filter originally required strict NLI entailment, which — once the real generator was wired in — rejected nearly every well-grounded, paraphrased LLM sentence (see §2.2); fixed to the contradiction+similarity check described there.
 
 **Before/after evidence**, produced live by `tests/test_safety.py` (a poisoned chunk planted in-memory at rank #1, no live database pollution):
 
@@ -101,7 +103,7 @@ after:  "No supporting context retrieved."
 
 ## 5. Ethics & licensing
 
-The system is **offline by design** — embedding (`bge-small-en-v1.5`), reranking (`bge-reranker-base`), and the planned generator (Qwen2.5-1.5B-Instruct) all run locally; no query or retrieved content is sent to a third-party API. This was an explicit decision in the brief, motivated by reproducibility, cost, and data-handling simplicity (nothing leaves the laptop).
+The system is **offline by design** — embedding (`bge-small-en-v1.5`), reranking (`bge-reranker-base`), and the generator (Qwen2.5-1.5B-Instruct, via local Ollama) all run locally; no query or retrieved content is sent to a third-party API. This was an explicit decision in the brief, motivated by reproducibility, cost, and data-handling simplicity (nothing leaves the laptop) — and it held even when the GPU path from the original plan turned out to be unavailable, since the CPU/Ollama substitute is equally local.
 
 **Model licenses**: `bge-small-en-v1.5` and `bge-reranker-base` (BAAI, MIT), `cross-encoder/nli-deberta-v3-small` (MIT), Qwen2.5-1.5B-Instruct (Apache 2.0) — all permit the academic/non-commercial use here. **Dataset**: the 144-paper corpus is open-access arXiv content, manifested with source URLs in `data/corpus_manifest.csv`.
 
@@ -114,15 +116,16 @@ The system is **offline by design** — embedding (`bge-small-en-v1.5`), reranki
 - **Off-topic papers in the corpus** — 7 papers with no connection to RAG/retrieval, found while building the gold set (§2.1); not yet pruned from the manifest.
 - **Gold set is a human-checkable draft**, not a finished artifact — `reviewed: false` on every item; a few carry PDF-extraction noise (ligatures, stray punctuation).
 - **`graph_guided` structurally excludes the vector seed** — by design (§3.2), not a bug, but it means this ablation arm specifically measures "how good is the graph signal alone," not "how good is the system when graph signal is added."
-- **Faithfulness/relevance are proxies on a stub generator** — see §2.2; not yet the final D3 quality measurement.
+- **Faithfulness/relevance are still proxies, even with the real generator** — see §2.2; not a substitute for a real RAGAS/human-judged evaluation.
+- **Generator runs on CPU via Ollama, not GPU-4-bit as originally planned** — same model id, real generated text, but slower (latency now dominated by generation, not retrieval) and not the exact execution path the brief named. A teammate with a CUDA GPU could swap in the bitsandbytes path without changing `app/graphrag.py`'s interface.
 - **No live user feedback loop yet** — `/feedback` stores signals but doesn't yet update retrieval; planned for D4 (River + ADWIN).
 
 ---
 
 ## 7. Future work (D4)
 
-1. Wire in the real generator (Qwen2.5-1.5B-Instruct, 4-bit) on GPU hardware; re-run `scripts/evaluate_d3.py` and `scripts/ablation_d3.py` against real generation rather than the extractive stand-in.
-2. Optional real-RAGAS cross-check once the generator exists, with an explicit note on judge-model noise at the 1.5B scale (per the brief's own caveat).
+1. Move the generator from Ollama/CPU to the brief's original bitsandbytes-4-bit-on-GPU path on hardware that has CUDA, for lower latency (current p95 is dominated by CPU generation time).
+2. Optional real-RAGAS cross-check using the now-live generator as judge, with an explicit note on judge-model noise at the 1.5B scale (per the brief's own caveat).
 3. PEFT/QLoRA-tune the generator on this corpus's domain (D4's stated focus).
 4. Strengthen the graph signal: real citation extraction (if feasible) or a richer topic taxonomy beyond 5 arXiv categories, to give `graph_guided` genuine relational signal to work with.
 5. Prune the 7 off-topic papers from the corpus manifest and re-validate D1/D2 metrics aren't affected.

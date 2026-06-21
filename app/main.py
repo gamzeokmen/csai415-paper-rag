@@ -23,6 +23,7 @@ from dotenv import load_dotenv
 from app import retrieval as rt
 from app.retrieval import state
 from app.graphrag import GraphRAGExecutor
+from app.generator import OllamaGenerator
 
 load_dotenv()
 
@@ -85,6 +86,7 @@ async def lifespan(app: FastAPI):
     state['graphrag'] = GraphRAGExecutor(
         neo4j_driver = state['neo4j'],
         docs_col     = state['db'].documents,
+        generator    = OllamaGenerator(),
     )
 
     yield  # ── app runs ────────────────────────────────────────────────────
@@ -155,6 +157,7 @@ class AskResponse(BaseModel):
     citations : list[Citation]
     steps     : list[dict]
     latency_ms: float
+    generator : str  # which path produced `answer` — e.g. 'qwen2.5:1.5b' or 'stub (extractive)'
 
 
 class StatsResponse(BaseModel):
@@ -295,6 +298,7 @@ async def ask(req: AskRequest):
         citations  = result['citations'],
         steps      = result['steps'],
         latency_ms = result['latency_ms'],
+        generator  = result['generator'],
     )
 
 

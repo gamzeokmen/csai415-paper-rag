@@ -51,12 +51,13 @@ def test_sanitize_chunks_separates_clean_from_flagged():
 async def test_filter_ungrounded_drops_unsupported_sentences():
     async with lifespan(fastapi_app):
         nli = state['nli']
+        embedder = state['embedder']
         context = ['Retrieval-Augmented Generation combines retrieval with generation to ground LLM outputs.']
         answer = (
             'Retrieval-Augmented Generation combines retrieval with generation to ground LLM outputs. '
             'The moon is made of cheese.'
         )
-        result = safety.filter_ungrounded(nli, answer, context)
+        result = safety.filter_ungrounded(nli, embedder, answer, context)
         assert 'cheese' not in result['filtered_answer']
         assert any('cheese' in s for s in result['dropped'])
         assert 0.0 < result['grounded_fraction'] < 1.0

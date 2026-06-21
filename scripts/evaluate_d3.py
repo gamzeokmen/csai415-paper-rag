@@ -1,8 +1,14 @@
 """
 D3 evaluator — runs every eval/gold_qa.json question through POST /ask for
 each ablation mode, computes:
-  - faithfulness: fraction of answer sentences entailed by the retrieved
-    context, via cross-encoder/nli-deberta-v3-small (proxy for RAGAS)
+  - faithfulness: app.safety.filter_ungrounded's grounded_fraction — the
+    same contradiction+similarity check that gates the live /ask pipeline
+    (proxy for RAGAS), NOT a strict entailment-only score. A pure-entailment
+    version was tried first and found empirically to score near-zero for
+    any real, paraphrased LLM answer even when clearly grounded (NLI
+    cross-encoders are trained for verbatim logical entailment, not
+    paraphrase recognition) — see app/safety.py's filter_ungrounded
+    docstring and D3_Report.md for the empirical comparison.
   - answer-relevance: cosine(answer embedding, question embedding), via
     bge-small (same embedder the API uses for retrieval)
   - IR metrics: Recall@5, MRR, nDCG@5 (notebook-09 convention: gold doc_id
@@ -11,15 +17,13 @@ each ablation mode, computes:
 
 Writes results/d3_eval.json + results/d3_eval.png.
 
-IMPORTANT — read before citing these numbers: GraphRAGExecutor.answer()
-(app/graphrag.py) is currently a deterministic EXTRACTIVE stand-in, not the
-brief's Qwen2.5-1.5B-Instruct generator (this machine's torch build has no
-CUDA support yet). Because the "answer" is literally an excerpt of the
-retrieved context, faithfulness will trivially run high — this validates the
-entailment-proxy PIPELINE end-to-end, it does not yet measure real generation
-quality. Re-run this script once the generator is wired in; until then, these
-numbers belong in the report as a pipeline sanity-check, not the final D3
-headline metric.
+The generator behind GraphRAGExecutor.answer() (app/graphrag.py) is
+app.generator.OllamaGenerator (qwen2.5:1.5b, local, CPU) — not the brief's
+bitsandbytes-4-bit-on-GPU path (this machine has no CUDA), but a real LLM
+generating real prose, not an extractive stand-in. If Ollama is unreachable,
+answer() degrades to an extractive excerpt instead of crashing; check the
+`generator` field on individual /ask responses if you need to confirm which
+path produced a given answer.
 
 Usage (server must be running: uvicorn app.main:app --port 8000):
     python scripts/evaluate_d3.py
@@ -27,7 +31,7 @@ Usage (server must be running: uvicorn app.main:app --port 8000):
 import json
 import math
 import os
-import re
+import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
@@ -41,8 +45,11 @@ from dotenv import load_dotenv
 from pymongo import MongoClient
 from sentence_transformers import CrossEncoder, SentenceTransformer
 
-load_dotenv()
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))  # so `from app import safety` resolves when run as a script
+from app import safety  # noqa: E402
+
+load_dotenv()
 GOLD_PATH = ROOT / 'eval' / 'gold_qa.json'
 OUT_JSON = ROOT / 'results' / 'd3_eval.json'
 OUT_PNG = ROOT / 'results' / 'd3_eval.png'
@@ -54,8 +61,6 @@ TOP_K = 5  # matches "Recall@5" directly
 
 EMBED_MODEL = 'BAAI/bge-small-en-v1.5'
 NLI_MODEL = 'cross-encoder/nli-deberta-v3-small'
-ENTAILMENT_LABEL_IDX = 1  # verified empirically — see module history / git log
-ENTAILMENT_THRESHOLD = 0.5
 
 
 def recall_at_k(retrieved_doc_ids: list, relevant_doc: str, k: int) -> float:
@@ -76,22 +81,14 @@ def ndcg_at_k(retrieved_doc_ids: list, relevant_doc: str, k: int) -> float:
     return 0.0
 
 
-def split_sentences(text: str) -> list[str]:
-    return [s.strip() for s in re.split(r'(?<=[.!?])\s+', text.strip()) if s.strip()]
-
-
-def faithfulness(nli: CrossEncoder, answer_text: str, context_texts: list[str]) -> float:
-    sentences = split_sentences(answer_text)
-    if not sentences or not context_texts:
-        return 0.0
-    entailed = 0
-    for sent in sentences:
-        pairs = [(ctx[:512], sent) for ctx in context_texts]
-        logits = nli.predict(pairs)
-        probs = np.exp(logits) / np.exp(logits).sum(axis=1, keepdims=True)
-        if probs[:, ENTAILMENT_LABEL_IDX].max() > ENTAILMENT_THRESHOLD:
-            entailed += 1
-    return entailed / len(sentences)
+def faithfulness(nli: CrossEncoder, embedder: SentenceTransformer, answer_text: str, context_texts: list[str]) -> float:
+    """Reuses app.safety.filter_ungrounded's grounded_fraction — same
+    contradiction+similarity check that gates the live /ask pipeline, so the
+    reported metric and the actual safety mechanism can't silently diverge.
+    See app/safety.py's filter_ungrounded docstring for why this isn't a
+    strict entailment-only check (real LLM paraphrases score near-zero
+    entailment against single-sentence premises even when well-grounded)."""
+    return safety.filter_ungrounded(nli, embedder, answer_text, context_texts)['grounded_fraction']
 
 
 def answer_relevance(embedder: SentenceTransformer, question: str, answer_text: str) -> float:
@@ -157,10 +154,11 @@ def run_evaluation(arms: list[tuple[str, str, bool]] | None = None) -> tuple[dic
                     'recall@5'       : recall_at_k(retrieved_doc_ids, gold_doc_id, 5),
                     'mrr'            : mrr(retrieved_doc_ids, gold_doc_id),
                     'ndcg@5'         : ndcg_at_k(retrieved_doc_ids, gold_doc_id, 5),
-                    'faithfulness'   : faithfulness(nli, body['answer'], context_texts),
+                    'faithfulness'   : faithfulness(nli, embedder, body['answer'], context_texts),
                     'answer_relevance': answer_relevance(embedder, item['question'], body['answer']),
                     'latency_ms'     : body['latency_ms'],
                     'wall_latency_ms': round(wall_ms, 1),
+                    'generator'      : body['generator'],
                 })
                 print(f"  q={item['question'][:60]!r:62} "
                       f"R@5={per_arm[label][-1]['recall@5']:.0f} "
@@ -189,13 +187,17 @@ def main() -> int:
     summary, per_mode = run_evaluation()
     gold = json.loads(GOLD_PATH.read_text(encoding='utf-8'))
 
+    generators_observed = sorted({
+        row['generator'] for rows in per_mode.values() for row in rows
+    })
+
     output = {
         'timestamp'  : datetime.now(timezone.utc).isoformat(),
         'gold_set_size': len(gold),
         'top_k'      : TOP_K,
         'embedding_model': EMBED_MODEL,
         'nli_model'  : NLI_MODEL,
-        'generator'  : 'stub (extractive) — see app/graphrag.py; not yet the Qwen2.5-1.5B-Instruct brief decision',
+        'generators_observed': generators_observed,  # derived from actual /ask responses, not hardcoded
         'summary'    : summary,
         'per_query'  : per_mode,
     }

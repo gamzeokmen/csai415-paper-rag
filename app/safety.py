@@ -6,16 +6,18 @@ D3 safety — two mitigations:
    now in developer mode", embedded "system:" prompts, etc.) so a poisoned
    document in the corpus can never become part of an answer or citation.
 
-2. Provenance filtering / source pinning: drop answer sentences that aren't
-   entailed by any retrieved context chunk, using the same NLI proxy as
-   Step 4's faithfulness metric — an answer may only say things its cited
-   sources actually support.
+2. Provenance filtering / source pinning: drop answer sentences that are
+   either NLI-contradicted by or semantically unrelated to every retrieved
+   context chunk — an answer may only say things its cited sources actually
+   support. Deliberately not a strict "must be NLI-entailed" check; see
+   filter_ungrounded()'s docstring for why that requirement empirically
+   rejects nearly all real (paraphrased) LLM output.
 
-Both are pattern/entailment-based, not an LLM judge. Documented limitation:
-a sufficiently paraphrased injection, or a confidently-worded but ungrounded
-claim phrased to superficially echo the context's wording, could still slip
-through either check. See results/d3_safety_before_after.json for a concrete
-case both mitigations are demonstrated against.
+Both are pattern/model-based, not an LLM judge. Documented limitation: a
+sufficiently paraphrased injection, or a confidently-worded but ungrounded
+claim phrased to superficially echo the context's wording and topic, could
+still slip through either check. See results/d3_safety_before_after.json for
+a concrete case both mitigations are demonstrated against.
 """
 import re
 
@@ -57,23 +59,49 @@ def _split_sentences(text: str) -> list[str]:
     return [s.strip() for s in re.split(r'(?<=[.!?])\s+', text.strip()) if s.strip()]
 
 
-def filter_ungrounded(nli, answer_text: str, context_texts: list[str], threshold: float = 0.5) -> dict:
-    """Provenance filtering: drop answer sentences not entailed by any
-    retrieved context chunk. `nli` is a CrossEncoder
-    (cross-encoder/nli-deberta-v3-small); index 1 = entailment, verified
-    empirically — see scripts/evaluate_d3.py."""
+def filter_ungrounded(
+    nli, embedder, answer_text: str, context_texts: list[str],
+    contradiction_threshold: float = 0.5, similarity_threshold: float = 0.6,
+) -> dict:
+    """Provenance filtering: drop an answer sentence unless it's BOTH (a) not
+    NLI-contradicted by any retrieved context chunk and (b) semantically
+    similar to at least one context chunk.
+
+    Deliberately not a strict "must be NLI-entailed" check. Verified
+    empirically (see git history / D3_Report.md): a real LLM's paraphrased
+    or synthesized answer sentences score near-zero entailment probability
+    against single-sentence premises even when clearly grounded — NLI
+    cross-encoders are trained for verbatim logical entailment (SNLI/MNLI
+    style), not paraphrase recognition. A pure entailment requirement would
+    reject nearly all real generated text, making the generator pointless
+    once wired up. The contradiction+similarity combination catches both
+    failure modes a pure-similarity or pure-entailment check would miss:
+    outright-contradicted claims (high contradiction prob) and irrelevant
+    fabrications unrelated to any retrieved chunk (low similarity), while
+    keeping genuine grounded paraphrases.
+
+    `nli` is a CrossEncoder (cross-encoder/nli-deberta-v3-small); index 0 =
+    contradiction, verified empirically — see scripts/evaluate_d3.py.
+    `embedder` is a SentenceTransformer (bge-small) for the similarity check.
+    """
     sentences = _split_sentences(answer_text)
     if not sentences:
         return {'filtered_answer': '', 'dropped': [], 'grounded_fraction': 0.0}
-    if not context_texts or nli is None:
+    if not context_texts or nli is None or embedder is None:
         return {'filtered_answer': '', 'dropped': sentences, 'grounded_fraction': 0.0}
 
+    context_vecs = embedder.encode(context_texts, normalize_embeddings=True)
     kept, dropped = [], []
     for sent in sentences:
         pairs = [(ctx[:512], sent) for ctx in context_texts]
         logits = nli.predict(pairs)
         probs = np.exp(logits) / np.exp(logits).sum(axis=1, keepdims=True)
-        if probs[:, 1].max() > threshold:
+        max_contradiction = probs[:, 0].max()
+
+        sent_vec = embedder.encode(sent, normalize_embeddings=True)
+        max_similarity = float((context_vecs @ sent_vec).max())
+
+        if max_contradiction < contradiction_threshold and max_similarity >= similarity_threshold:
             kept.append(sent)
         else:
             dropped.append(sent)

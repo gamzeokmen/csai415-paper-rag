@@ -61,7 +61,7 @@ def write_run_card() -> None:
             'embedder': eval_data['embedding_model'],
             'reranker': 'BAAI/bge-reranker-base',
             'nli': eval_data['nli_model'],
-            'generator': eval_data['generator'],
+            'generators_observed': eval_data['generators_observed'],
         },
         'seeds': {
             'gold_qa_sample_seed': 415,  # scripts/build_gold_qa.py SEED
