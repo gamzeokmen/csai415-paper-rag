@@ -1,6 +1,6 @@
-# AI Chat Logs — CSAI415 Deliverables 1 & 2
+# AI Chat Logs — CSAI415 Deliverables 1, 2 & 3
 
-This file contains links to the complete unedited AI conversations (Claude and ChatGPT) used during the development of D1 and D2, submitted as required by the course rubric.
+This file contains links to the complete unedited AI conversations (Claude and ChatGPT) used during the development of D1 and D2, and a summary of the D3 AI-assisted session, submitted as required by the course rubric.
 
 ---
 
@@ -34,13 +34,82 @@ Key debugging sessions included: Docker volume/database name mismatches, qdrant-
 
 ---
 
+## D3 Session
+
+### Chat 4 — D3 GraphRAG executor, evaluation, safety, and generator integration
+
+This was a Claude Code (CLI) session, not a claude.ai web chat, so no shareable
+link exists for it — Claude Code sessions run against a local repository
+checkout and don't generate a `claude.ai/share/...` URL. Instead, the full
+session transcript is included directly in this repo:
+
+**Full transcript:** [`D3_chat_log.md`](D3_chat_log.md) — a cleaned, readable
+export of the complete local session log (74 exchanges). Typos and informal
+phrasing in the human turns were corrected for readability; no requests,
+decisions, or technical content were altered. One credential leaked mid-session
+during a debugging exchange (a Neo4j Aura database password) has been redacted.
+
+The summary below covers the same scope, condensed.
+
+**Scope:** built D3 (GraphRAG executor, evaluation harness, safety mitigations,
+ablation, hygiene, report) on top of the graded D2 system, end to end, plus a
+follow-up to wire in a real LLM generator. All 9 D3 PRs (#2–#10) plus a
+follow-up generator PR (#11) were opened as drafts, reviewed by the team
+member present, and merged into `main` only after explicit approval at each
+stage — no direct pushes to `main`.
+
+**Real bugs found and fixed during this session** (not hidden, all called out
+in their respective PR descriptions and commit messages):
+1. `app/main.py` keyed retrieval on a `chunk_idx` field that doesn't exist in
+   the real schema — every dense hit silently fell back to index 0, making
+   real page-numbered citations impossible until fixed.
+2. The new D3 gold-set's fallback question template collapsed to ~3 generic
+   strings shared across multiple papers (zero retrieval signal) — caught
+   because a first evaluation run scored Recall@5 ≈ 0.06–0.11 across all
+   three modes; fixed with content-anchored question generation.
+3. A stray PDF-extraction punctuation artifact broke the same gold-set logic
+   for one item, producing a grammatically broken question.
+4. A generator-stub disclaimer string was leaking into the text graded for
+   faithfulness/relevance, dragging both metrics down for no real reason.
+5. An early draft of the provenance filter fell back to *unfiltered* text
+   whenever nothing survived the filter — which would have silently defeated
+   the entire safety mitigation if shipped.
+6. The provenance filter's NLI-entailment-only check, once a real LLM
+   generator was wired in, rejected nearly every well-grounded paraphrased
+   sentence (verified empirically — a clearly-grounded paraphrase scored
+   0.001 entailment probability against its own source). Fixed by switching
+   to an NLI-contradiction + embedding-similarity check instead.
+7. A flaky test (`tests/test_api.py`) had no explicit HTTP timeout and
+   started intermittently failing once the server's startup load increased.
+8. Random sampling while building the gold set surfaced 7 papers in the
+   144-paper corpus with no connection to RAG/retrieval at all (particle
+   physics, pure math, geophysics) — flagged for the team, not silently
+   dropped from awareness.
+
+**Key decisions made, with trade-offs surfaced for the team rather than
+decided unilaterally:** scoping Step 1 to build retrieval mechanics before
+the generator; capping shared-topic graph expansion given a 96%-dominant
+single category; using Ollama (`qwen2.5:1.5b`, CPU) as a substitute for the
+brief's GPU-bitsandbytes-4-bit generator plan, since the brief's own
+`Generator` interface explicitly allowed an `ollama` backend and the dev
+machine had no CUDA.
+
+**Verification discipline:** every numeric claim in `README.md` and
+`D3_Report.md` was cross-checked against `results/d3_run_card.yaml` (the
+generated, non-hand-edited source of truth) before being written. The full
+test suite (23/23) and the one-command `scripts/run_d3.py` pipeline were
+re-run multiple times throughout the session, including after each
+significant code change, not just once at the end.
+
+---
+
 ## Summary of AI usage
 
 AI assistants (Claude and ChatGPT) were used across the project for:
-- Architectural decisions (RRF over weighted sum, async driver selection, cross-encoder reranker integration)
-- Code generation for FastAPI endpoints, evaluation scripts, plotting code, and Jupyter notebooks
-- Debugging cascading errors during Docker/database integration
-- Writing and iterating on the D2 report
-- Pre-submission audit identifying and fixing metric inconsistencies
+- Architectural decisions (RRF over weighted sum, async driver selection, cross-encoder reranker integration, multi-hop Cypher design, NLI-based safety/faithfulness checks)
+- Code generation for FastAPI endpoints, evaluation scripts, plotting code, Jupyter notebooks, and the D3 GraphRAG executor
+- Debugging cascading errors during Docker/database integration and D3 evaluation pipeline development
+- Writing and iterating on the D2 and D3 reports
+- Pre-submission audits identifying and fixing metric inconsistencies, both in D2 and during D3 (gold-set defects, a leaking disclaimer string, an over-strict NLI filter)
 
 All code was reviewed, executed, and verified by the team. All metrics in the report come from actual notebook outputs, not generated text.
