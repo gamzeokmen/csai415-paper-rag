@@ -36,12 +36,19 @@ ARMS = [
 ]
 
 
-def interpret(summary: dict) -> str:
+def interpret(summary: dict, generators_observed: list[str]) -> str:
     """2-3 sentence interpretation, generated from the actual numbers, not
     canned — and including the honest synthetic-CITES caveat the brief asks
     for."""
     v, g, hnr, h = (summary['vector_only'], summary['graph_guided'],
                     summary['hybrid_no_rerank'], summary['hybrid'])
+    gen_label = ', '.join(generators_observed) if generators_observed else 'unknown'
+    faith_delta = h['faithfulness'] - hnr['faithfulness']
+    faith_phrase = (
+        f"changes only modestly ({hnr['faithfulness']:.2f} -> {h['faithfulness']:.2f})"
+        if abs(faith_delta) < 0.1 else
+        f"shifts noticeably ({hnr['faithfulness']:.2f} -> {h['faithfulness']:.2f})"
+    )
     lines = [
         f"On this 18-item gold set, vector_only and hybrid both reach Recall@5={v['recall@5']:.2f}, "
         f"while graph_guided alone reaches only {g['recall@5']:.2f} — this is expected, not a defect: "
@@ -51,10 +58,9 @@ def interpret(summary: dict) -> str:
         f"Reranking lifts Recall@5 from {hnr['recall@5']:.2f} (hybrid, no rerank) to "
         f"{h['recall@5']:.2f} (hybrid+rerank) at a latency cost of "
         f"{h['p95_ms'] - hnr['p95_ms']:.0f}ms p95 — consistent with D2's own finding that the "
-        f"cross-encoder rerank is the single biggest quality lever in the pipeline; faithfulness stays "
-        f"flat ({hnr['faithfulness']:.2f} -> {h['faithfulness']:.2f}) because it's measured against "
-        f"whichever single excerpt the extractive stub picks, which reranking doesn't materially change "
-        f"here even when it changes *which paper* that excerpt comes from.",
+        f"cross-encoder rerank is the single biggest quality lever in the pipeline; faithfulness "
+        f"{faith_phrase} because reranking changes which paper/chunk ends up as context for the "
+        f"generator ({gen_label}), not how thoroughly the answer gets verified against it.",
         "Honest limitation: graph_guided's weakness here is partly an artifact of this corpus's graph "
         "signal being thin — CITES is 300 synthetic edges (co-author-or-same-venue heuristic, not real "
         "citations; the 144 papers don't actually cite each other) and Topic coverage is dominated by a "
@@ -67,20 +73,23 @@ def interpret(summary: dict) -> str:
 def main() -> int:
     summary, per_arm = run_evaluation(ARMS)
     gold_size = len(json.loads(GOLD_PATH.read_text(encoding='utf-8')))
+    generators_observed = sorted({row['generator'] for rows in per_arm.values() for row in rows})
 
     output = {
         'timestamp': datetime.now(timezone.utc).isoformat(),
         'gold_set_size': gold_size,
         'arms': [label for label, _, _ in ARMS],
         'summary': summary,
-        'interpretation': interpret(summary),
+        'generators_observed': generators_observed,
+        'interpretation': interpret(summary, generators_observed),
         'limitations': [
             'CITES is 300 synthetic edges (co-author-or-same-venue + 1-year-window heuristic), '
             'not real citations — the 144 papers in this corpus do not actually cite each other.',
             'Topic nodes are just the 5 arXiv categories and cs.IR alone covers 138/144 papers (96%), '
             'so shared-topic alone is a weak/non-discriminating graph signal at this corpus size.',
-            'Faithfulness/relevance reflect the extractive answer() stand-in, not the brief\'s '
-            'Qwen2.5-1.5B-Instruct generator (not yet wired up — needs CUDA torch + bitsandbytes).',
+            f'Generator(s) observed in this run: {", ".join(generators_observed) or "none"} — via '
+            'Ollama (CPU-quantized), not the brief\'s bitsandbytes-4-bit-on-GPU path (this machine '
+            'has no CUDA). Falls back to an extractive stand-in if Ollama is unreachable.',
             'graph_guided structurally excludes vector-seeded papers from its results (returns '
             'neighbors, not seeds), so it is expected to underperform on gold questions whose answer '
             'is the directly-matching paper rather than a related one.',

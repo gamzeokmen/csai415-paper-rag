@@ -15,7 +15,7 @@ Hybrid retrieval-augmented generation system over 144 arXiv papers on RAG/retrie
 | Fusion | Reciprocal Rank Fusion, k=60 |
 | API | FastAPI 2.0.0 (motor + AsyncQdrantClient + AsyncGraphDatabase) |
 | NLI proxy (D3) | cross-encoder/nli-deberta-v3-small — faithfulness + provenance filtering |
-| Generator (D3) | extractive stand-in for now; Qwen2.5-1.5B-Instruct (4-bit) planned — see Limitations |
+| Generator (D3) | Ollama, qwen2.5:1.5b (CPU, local) — same model id as the brief's GPU-4-bit decision; falls back to an extractive stand-in if Ollama is unreachable |
 
 ## Architecture — dataflow (ingest → stores → retrieval → graph)
 
@@ -57,16 +57,18 @@ flowchart LR
 
 ## D3 headline results (18-item gold Q/A set, `python scripts/run_d3.py`)
 
+Measured with the real generator live (Ollama, `qwen2.5:1.5b`):
+
 | Arm | R@5 | Faithfulness | Relevance | p95 ms |
 |---|---|---|---|---|
-| vector_only | 1.000 | 0.333 | 0.629 | 5340 |
-| graph_guided | 0.056 | 0.389 | 0.610 | 7419 |
-| hybrid_no_rerank | 0.444 | 0.333 | 0.584 | 2411 |
-| **hybrid (+rerank)** | **1.000** | **0.333** | **0.629** | **6184** |
+| vector_only | 1.000 | 0.889 | 0.791 | 39367 |
+| graph_guided | 0.056 | 0.944 | 0.762 | 41524 |
+| hybrid_no_rerank | 0.444 | 0.889 | 0.772 | 25907 |
+| **hybrid (+rerank)** | **1.000** | **0.889** | **0.800** | **40254** |
 
-`graph_guided`'s low R@5 is expected, not a defect — `select_subgraph` returns graph *neighbors*, never the vector-seeded papers themselves (see Limitations). Reranking lifts R@5 from 0.444 → 1.000. Faithfulness/relevance are proxy metrics against the current extractive `answer()` stand-in, not the brief's planned LLM generator — see Limitations. Full numbers, interpretation, and safety demo evidence: `results/d3_run_card.yaml`.
+`graph_guided`'s low R@5 is expected, not a defect — `select_subgraph` returns graph *neighbors*, never the vector-seeded papers themselves (see Limitations). Reranking lifts R@5 from 0.444 → 1.000, at a real latency cost (LLM generation now dominates `/ask` latency, not just retrieval+rerank). Faithfulness/relevance are proxy metrics (`app/safety.py`'s contradiction+similarity check, not strict NLI entailment — see Limitations for why) against real generated answers. Full numbers, interpretation, and safety demo evidence: `results/d3_run_card.yaml`.
 
-Tests: **23/23 pytest passing**, ~3 min (D2's 12 + D3's `test_ask`/`test_graphrag`/`test_safety`).
+Tests: **23/23 pytest passing** (D2's 12 + D3's `test_ask`/`test_graphrag`/`test_safety`).
 
 ## Quick start
 
@@ -102,6 +104,14 @@ pytest tests/ -v
 ## D3 quick start
 
 Requires the API running (step 5 above) and `eval/gold_qa.json` (already committed; regenerate with `python scripts/build_gold_qa.py` if needed).
+
+**Optional — real LLM answers via Ollama.** By default `/ask` returns an extractive excerpt as the answer (no extra setup needed — this is what every D3 result in this repo was originally measured against). For actual LLM-generated prose instead:
+```bash
+# install Ollama (https://ollama.com), then:
+ollama pull qwen2.5:1.5b
+ollama serve   # if not already running as a background service
+```
+`app/main.py` always tries to use it, but **this is not required** — if Ollama isn't running, `GraphRAGExecutor.answer()` automatically falls back to the extractive stub (try/except around the generator call, same graceful-degrade pattern as the Neo4j-down handling). Nothing breaks for teammates who skip this step; check the `generator` field on any `/ask` response to see which path actually answered (`qwen2.5:1.5b` vs `stub (extractive)`).
 
 ```bash
 # one command: re-runs eval, ablation, safety, full test suite, and writes

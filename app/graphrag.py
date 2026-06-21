@@ -18,12 +18,14 @@ shared-author as the primary expansion paths and caps shared-topic's
 contribution to TOPIC_FANOUT_CAP candidates per seed, so a single dominant
 topic can't make "graph-guided" degenerate into "the whole corpus".
 
-The `answer()` stage's LLM generation (Qwen2.5-1.5B-Instruct, 4-bit) is not
-yet wired up — this machine's torch build has no CUDA support, so the
-GPU-4-bit generator from the D3 brief needs a separate setup pass. answer()
-currently returns a deterministic extractive stand-in plus full citations
-(doc_id, chunk_id, title, pages) so the retrieval/citation mechanics can be
-built and tested end-to-end first.
+The `answer()` stage's LLM generation now runs via app.generator.OllamaGenerator
+(qwen2.5:1.5b, GGUF-quantized, local Ollama server) — this machine's torch
+build has no CUDA support, so the brief's bitsandbytes-4-bit-on-GPU path
+isn't available; Ollama's CPU-quantized version of the *same* model id is
+the practical substitute, still fully offline. If no generator is passed in
+(or a call to it fails), `answer()` degrades to a deterministic extractive
+stand-in rather than crashing — same graceful-degrade philosophy as the
+Neo4j-down handling elsewhere in this module.
 """
 import logging
 import time
@@ -62,9 +64,10 @@ _PROVENANCE_PRIORITY = {'cites': 0, 'shared_author': 1, 'shared_topic': 2}
 
 
 class GraphRAGExecutor:
-    def __init__(self, neo4j_driver, docs_col):
+    def __init__(self, neo4j_driver, docs_col, generator=None):
         self.neo4j = neo4j_driver
         self.docs_col = docs_col
+        self.generator = generator
 
     # ── stage 1 ──────────────────────────────────────────────────────────────
     async def select_subgraph(
@@ -206,28 +209,46 @@ class GraphRAGExecutor:
             })
             excerpts.append(entry['text'])
 
-        # The disclaimer is metadata about the pipeline, not a claim — keep it
-        # out of `answer` so faithfulness/relevance scoring (Step 4) grades
-        # the actual extracted content, not an unrelated bracketed note.
         if not excerpts:
-            answer_text = 'No supporting context retrieved.'
-            provenance = {'dropped': [], 'grounded_fraction': 0.0}
+            return {
+                'answer': 'No supporting context retrieved.',
+                'citations': citations,
+                'generator': 'none',
+                'safety_flagged': flagged,
+                'grounded_fraction': 0.0,
+            }
+
+        generator_label = 'stub (extractive)'
+        if self.generator is not None:
+            numbered_context = '\n\n'.join(
+                f"[{c['doc_id']} p.{c['pages'][0]}] {excerpt[:800]}"
+                for c, excerpt in zip(citations, excerpts)
+            )
+            try:
+                raw_answer = await self.generator.generate(query, numbered_context)
+                generator_label = getattr(self.generator, 'model', 'llm')
+            except Exception as exc:  # noqa: BLE001 — never let a generator outage crash /ask
+                log.warning('generator call failed, degrading to extractive stub: %s', exc)
+                raw_answer = excerpts[0][:300]
         else:
             raw_answer = excerpts[0][:300]
-            provenance = safety.filter_ungrounded(rt.state.get('nli'), raw_answer, excerpts)
-            # Note: never fall back to raw_answer here — if nothing survived
-            # the filter, the extracted excerpt wasn't verifiably grounded,
-            # and silently returning it anyway would defeat the mitigation.
-            answer_text = provenance['filtered_answer'] or (
-                '[provenance filter] No sentence in the extracted excerpt '
-                'could be verified as grounded in the retrieved context.'
-            )
+
+        # The disclaimer is metadata about the pipeline, not a claim — keep it
+        # out of `answer` so faithfulness/relevance scoring (Step 4) grades
+        # the actual extracted/generated content, not an unrelated bracketed note.
+        provenance = safety.filter_ungrounded(rt.state.get('nli'), rt.state.get('embedder'), raw_answer, excerpts)
+        # Note: never fall back to raw_answer here — if nothing survived the
+        # filter, the answer wasn't verifiably grounded, and silently
+        # returning it anyway would defeat the mitigation.
+        answer_text = provenance['filtered_answer'] or (
+            '[provenance filter] No sentence in the answer could be verified '
+            'as grounded in the retrieved context.'
+        )
 
         return {
             'answer'        : answer_text,
             'citations'     : citations,
-            'generator'     : 'stub',
-            'generator_note': 'D3 generator not yet wired — see app/graphrag.py module docstring',
+            'generator'     : generator_label,
             'safety_flagged': flagged,
             'grounded_fraction': provenance['grounded_fraction'],
         }
