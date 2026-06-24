@@ -55,7 +55,14 @@ async def lifespan(app: FastAPI):
     state['reranker'] = CrossEncoder(RERANK_MODEL, max_length=512)
 
     log.info('startup: loading NLI cross-encoder for D3 provenance filtering')
-    state['nli'] = CrossEncoder(NLI_MODEL)
+    try:
+        import concurrent.futures as _cf
+        with _cf.ThreadPoolExecutor(max_workers=1) as _pool:
+            _fut = _pool.submit(CrossEncoder, NLI_MODEL)
+            state['nli'] = _fut.result(timeout=30)
+    except Exception as _nli_err:
+        log.warning('NLI model unavailable (%s) — provenance filtering disabled', _nli_err)
+        state['nli'] = None
 
     log.info('startup: connecting to MongoDB at %s', MONGO_URI)
     state['mongo'] = AsyncIOMotorClient(MONGO_URI)
